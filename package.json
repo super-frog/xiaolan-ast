@@ -1,0 +1,17 @@
+{
+  "name": "xiaolan-ast",
+  "version": "1.0.2",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "esprima": "^4.0.0",
+    "frog-lib": "^1.0.2",
+    "xiaolan-router": "^1.0.1"
+  },
+  "devDependencies": {}
+}

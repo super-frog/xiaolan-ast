@@ -1,0 +1,1386 @@
+[
+  {
+    "type": "ExpressionStatement",
+    "expression": {
+      "type": "Literal",
+      "value": "use strict",
+      "raw": "\"use strict\""
+    },
+    "directive": "use strict"
+  },
+  {
+    "type": "VariableDeclaration",
+    "declarations": [
+      {
+        "type": "VariableDeclarator",
+        "id": {
+          "type": "Identifier",
+          "name": "Dob"
+        },
+        "init": {
+          "type": "CallExpression",
+          "callee": {
+            "type": "Identifier",
+            "name": "require"
+          },
+          "arguments": [
+            {
+              "type": "Literal",
+              "value": "./Dob.gen",
+              "raw": "'./Dob.gen'"
+            }
+          ]
+        }
+      }
+    ],
+    "kind": "const"
+  },
+  {
+    "type": "ClassDeclaration",
+    "id": {
+      "type": "Identifier",
+      "name": "User"
+    },
+    "superClass": null,
+    "body": {
+      "type": "ClassBody",
+      "body": [
+        {
+          "type": "MethodDefinition",
+          "key": {
+            "type": "Identifier",
+            "name": "constructor"
+          },
+          "computed": false,
+          "value": {
+            "type": "FunctionExpression",
+            "id": null,
+            "params": [
+              {
+                "type": "AssignmentPattern",
+                "left": {
+                  "type": "Identifier",
+                  "name": "options"
+                },
+                "right": {
+                  "type": "ObjectExpression",
+                  "properties": []
+                }
+              }
+            ],
+            "body": {
+              "type": "BlockStatement",
+              "body": [
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "ThisExpression"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "name"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "MemberExpression",
+                        "computed": false,
+                        "object": {
+                          "type": "Identifier",
+                          "name": "options"
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "name"
+                        }
+                      },
+                      "right": {
+                        "type": "Literal",
+                        "value": "doge",
+                        "raw": "'doge'"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "ThisExpression"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "age"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "MemberExpression",
+                        "computed": false,
+                        "object": {
+                          "type": "Identifier",
+                          "name": "options"
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "age"
+                        }
+                      },
+                      "right": {
+                        "type": "Literal",
+                        "value": 18,
+                        "raw": "18"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "ThisExpression"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "gender"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "MemberExpression",
+                        "computed": false,
+                        "object": {
+                          "type": "Identifier",
+                          "name": "options"
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "gender"
+                        }
+                      },
+                      "right": {
+                        "type": "Literal",
+                        "value": 1,
+                        "raw": "1"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "ThisExpression"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "weekday"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "MemberExpression",
+                        "computed": false,
+                        "object": {
+                          "type": "Identifier",
+                          "name": "options"
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "weekday"
+                        }
+                      },
+                      "right": {
+                        "type": "Literal",
+                        "value": 1,
+                        "raw": "1"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "ThisExpression"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "fav"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "MemberExpression",
+                        "computed": false,
+                        "object": {
+                          "type": "Identifier",
+                          "name": "options"
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "fav"
+                        }
+                      },
+                      "right": {
+                        "type": "ArrayExpression",
+                        "elements": [
+                          {
+                            "type": "Literal",
+                            "value": "fm2017",
+                            "raw": "'fm2017'"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "ThisExpression"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "dob"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "NewExpression",
+                        "callee": {
+                          "type": "Identifier",
+                          "name": "Dob"
+                        },
+                        "arguments": [
+                          {
+                            "type": "MemberExpression",
+                            "computed": false,
+                            "object": {
+                              "type": "Identifier",
+                              "name": "options"
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "dob"
+                            }
+                          }
+                        ]
+                      },
+                      "right": {
+                        "type": "NewExpression",
+                        "callee": {
+                          "type": "Identifier",
+                          "name": "Dob"
+                        },
+                        "arguments": [
+                          {
+                            "type": "ObjectExpression",
+                            "properties": []
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "ThisExpression"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "validate"
+                      }
+                    },
+                    "arguments": []
+                  }
+                }
+              ]
+            },
+            "generator": false,
+            "expression": false,
+            "async": false
+          },
+          "kind": "constructor",
+          "static": false
+        },
+        {
+          "type": "MethodDefinition",
+          "key": {
+            "type": "Identifier",
+            "name": "fromRequest"
+          },
+          "computed": false,
+          "value": {
+            "type": "FunctionExpression",
+            "id": null,
+            "params": [
+              {
+                "type": "Identifier",
+                "name": "req"
+              }
+            ],
+            "body": {
+              "type": "BlockStatement",
+              "body": [
+                {
+                  "type": "VariableDeclaration",
+                  "declarations": [
+                    {
+                      "type": "VariableDeclarator",
+                      "id": {
+                        "type": "Identifier",
+                        "name": "options"
+                      },
+                      "init": {
+                        "type": "ObjectExpression",
+                        "properties": []
+                      }
+                    }
+                  ],
+                  "kind": "let"
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "Identifier",
+                        "name": "options"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "name"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "LogicalExpression",
+                        "operator": "&&",
+                        "left": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "Identifier",
+                            "name": "req"
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "body"
+                          }
+                        },
+                        "right": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "MemberExpression",
+                            "computed": false,
+                            "object": {
+                              "type": "Identifier",
+                              "name": "req"
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "body"
+                            }
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "name"
+                          }
+                        }
+                      },
+                      "right": {
+                        "type": "Literal",
+                        "value": "doge",
+                        "raw": "'doge'"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "Identifier",
+                        "name": "options"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "age"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "LogicalExpression",
+                        "operator": "&&",
+                        "left": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "Identifier",
+                            "name": "req"
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "body"
+                          }
+                        },
+                        "right": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "MemberExpression",
+                            "computed": false,
+                            "object": {
+                              "type": "Identifier",
+                              "name": "req"
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "body"
+                            }
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "age"
+                          }
+                        }
+                      },
+                      "right": {
+                        "type": "Literal",
+                        "value": 18,
+                        "raw": "18"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "Identifier",
+                        "name": "options"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "gender"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "LogicalExpression",
+                        "operator": "&&",
+                        "left": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "Identifier",
+                            "name": "req"
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "query"
+                          }
+                        },
+                        "right": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "MemberExpression",
+                            "computed": false,
+                            "object": {
+                              "type": "Identifier",
+                              "name": "req"
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "query"
+                            }
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "gender"
+                          }
+                        }
+                      },
+                      "right": {
+                        "type": "Literal",
+                        "value": 1,
+                        "raw": "1"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "Identifier",
+                        "name": "options"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "weekday"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "LogicalExpression",
+                        "operator": "&&",
+                        "left": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "Identifier",
+                            "name": "req"
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "body"
+                          }
+                        },
+                        "right": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "MemberExpression",
+                            "computed": false,
+                            "object": {
+                              "type": "Identifier",
+                              "name": "req"
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "body"
+                            }
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "weekday"
+                          }
+                        }
+                      },
+                      "right": {
+                        "type": "Literal",
+                        "value": 1,
+                        "raw": "1"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "Identifier",
+                        "name": "options"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "fav"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "LogicalExpression",
+                        "operator": "&&",
+                        "left": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "Identifier",
+                            "name": "req"
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "body"
+                          }
+                        },
+                        "right": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "MemberExpression",
+                            "computed": false,
+                            "object": {
+                              "type": "Identifier",
+                              "name": "req"
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "body"
+                            }
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "fav"
+                          }
+                        }
+                      },
+                      "right": {
+                        "type": "ArrayExpression",
+                        "elements": [
+                          {
+                            "type": "Literal",
+                            "value": "fm2017",
+                            "raw": "'fm2017'"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "AssignmentExpression",
+                    "operator": "=",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "Identifier",
+                        "name": "options"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "dob"
+                      }
+                    },
+                    "right": {
+                      "type": "LogicalExpression",
+                      "operator": "||",
+                      "left": {
+                        "type": "LogicalExpression",
+                        "operator": "&&",
+                        "left": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "Identifier",
+                            "name": "req"
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "body"
+                          }
+                        },
+                        "right": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "MemberExpression",
+                            "computed": false,
+                            "object": {
+                              "type": "Identifier",
+                              "name": "req"
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "body"
+                            }
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "dob"
+                          }
+                        }
+                      },
+                      "right": {
+                        "type": "NewExpression",
+                        "callee": {
+                          "type": "Identifier",
+                          "name": "Dob"
+                        },
+                        "arguments": [
+                          {
+                            "type": "ObjectExpression",
+                            "properties": []
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "ReturnStatement",
+                  "argument": {
+                    "type": "NewExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "User"
+                    },
+                    "arguments": [
+                      {
+                        "type": "Identifier",
+                        "name": "options"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "generator": false,
+            "expression": false,
+            "async": false
+          },
+          "kind": "method",
+          "static": true
+        },
+        {
+          "type": "MethodDefinition",
+          "key": {
+            "type": "Identifier",
+            "name": "getGender"
+          },
+          "computed": false,
+          "value": {
+            "type": "FunctionExpression",
+            "id": null,
+            "params": [],
+            "body": {
+              "type": "BlockStatement",
+              "body": [
+                {
+                  "type": "ReturnStatement",
+                  "argument": {
+                    "type": "MemberExpression",
+                    "computed": true,
+                    "object": {
+                      "type": "ArrayExpression",
+                      "elements": [
+                        {
+                          "type": "Literal",
+                          "value": "unknown",
+                          "raw": "'unknown'"
+                        },
+                        {
+                          "type": "Literal",
+                          "value": "男",
+                          "raw": "'男'"
+                        },
+                        {
+                          "type": "Literal",
+                          "value": "女",
+                          "raw": "'女'"
+                        }
+                      ]
+                    },
+                    "property": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "ThisExpression"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "gender"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "generator": false,
+            "expression": false,
+            "async": false
+          },
+          "kind": "method",
+          "static": false
+        },
+        {
+          "type": "MethodDefinition",
+          "key": {
+            "type": "Identifier",
+            "name": "getWeekday"
+          },
+          "computed": false,
+          "value": {
+            "type": "FunctionExpression",
+            "id": null,
+            "params": [],
+            "body": {
+              "type": "BlockStatement",
+              "body": [
+                {
+                  "type": "ReturnStatement",
+                  "argument": {
+                    "type": "MemberExpression",
+                    "computed": true,
+                    "object": {
+                      "type": "ArrayExpression",
+                      "elements": [
+                        {
+                          "type": "Literal",
+                          "value": "unknown",
+                          "raw": "'unknown'"
+                        },
+                        {
+                          "type": "Literal",
+                          "value": "星期一",
+                          "raw": "'星期一'"
+                        },
+                        {
+                          "type": "Literal",
+                          "value": "星期二",
+                          "raw": "'星期二'"
+                        },
+                        {
+                          "type": "Literal",
+                          "value": "星期三",
+                          "raw": "'星期三'"
+                        },
+                        {
+                          "type": "Literal",
+                          "value": "星期四",
+                          "raw": "'星期四'"
+                        },
+                        {
+                          "type": "Literal",
+                          "value": "星期五",
+                          "raw": "'星期五'"
+                        }
+                      ]
+                    },
+                    "property": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "ThisExpression"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "weekday"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "generator": false,
+            "expression": false,
+            "async": false
+          },
+          "kind": "method",
+          "static": false
+        },
+        {
+          "type": "MethodDefinition",
+          "key": {
+            "type": "Identifier",
+            "name": "validate"
+          },
+          "computed": false,
+          "value": {
+            "type": "FunctionExpression",
+            "id": null,
+            "params": [
+              {
+                "type": "Identifier",
+                "name": "fields"
+              }
+            ],
+            "body": {
+              "type": "BlockStatement",
+              "body": [
+                {
+                  "type": "IfStatement",
+                  "test": {
+                    "type": "UnaryExpression",
+                    "operator": "!",
+                    "argument": {
+                      "type": "LogicalExpression",
+                      "operator": "&&",
+                      "left": {
+                        "type": "LogicalExpression",
+                        "operator": "&&",
+                        "left": {
+                          "type": "BinaryExpression",
+                          "operator": "===",
+                          "left": {
+                            "type": "UnaryExpression",
+                            "operator": "typeof",
+                            "argument": {
+                              "type": "MemberExpression",
+                              "computed": false,
+                              "object": {
+                                "type": "ThisExpression"
+                              },
+                              "property": {
+                                "type": "Identifier",
+                                "name": "name"
+                              }
+                            },
+                            "prefix": true
+                          },
+                          "right": {
+                            "type": "Literal",
+                            "value": "string",
+                            "raw": "'string'"
+                          }
+                        },
+                        "right": {
+                          "type": "BinaryExpression",
+                          "operator": ">",
+                          "left": {
+                            "type": "MemberExpression",
+                            "computed": false,
+                            "object": {
+                              "type": "MemberExpression",
+                              "computed": false,
+                              "object": {
+                                "type": "ThisExpression"
+                              },
+                              "property": {
+                                "type": "Identifier",
+                                "name": "name"
+                              }
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "length"
+                            }
+                          },
+                          "right": {
+                            "type": "Literal",
+                            "value": 2,
+                            "raw": "2"
+                          }
+                        }
+                      },
+                      "right": {
+                        "type": "BinaryExpression",
+                        "operator": "<",
+                        "left": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "MemberExpression",
+                            "computed": false,
+                            "object": {
+                              "type": "ThisExpression"
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "name"
+                            }
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "length"
+                          }
+                        },
+                        "right": {
+                          "type": "Literal",
+                          "value": 16,
+                          "raw": "16"
+                        }
+                      }
+                    },
+                    "prefix": true
+                  },
+                  "consequent": {
+                    "type": "BlockStatement",
+                    "body": [
+                      {
+                        "type": "ThrowStatement",
+                        "argument": {
+                          "type": "NewExpression",
+                          "callee": {
+                            "type": "Identifier",
+                            "name": "Error"
+                          },
+                          "arguments": [
+                            {
+                              "type": "Literal",
+                              "value": "type validate failed: [name]: String length must between 2 to 16",
+                              "raw": "'type validate failed: [name]: String length must between 2 to 16'"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "alternate": null
+                },
+                {
+                  "type": "IfStatement",
+                  "test": {
+                    "type": "UnaryExpression",
+                    "operator": "!",
+                    "argument": {
+                      "type": "LogicalExpression",
+                      "operator": "&&",
+                      "left": {
+                        "type": "LogicalExpression",
+                        "operator": "&&",
+                        "left": {
+                          "type": "CallExpression",
+                          "callee": {
+                            "type": "MemberExpression",
+                            "computed": false,
+                            "object": {
+                              "type": "Identifier",
+                              "name": "Number"
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "isInteger"
+                            }
+                          },
+                          "arguments": [
+                            {
+                              "type": "MemberExpression",
+                              "computed": false,
+                              "object": {
+                                "type": "ThisExpression"
+                              },
+                              "property": {
+                                "type": "Identifier",
+                                "name": "age"
+                              }
+                            }
+                          ]
+                        },
+                        "right": {
+                          "type": "BinaryExpression",
+                          "operator": ">=",
+                          "left": {
+                            "type": "MemberExpression",
+                            "computed": false,
+                            "object": {
+                              "type": "ThisExpression"
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "age"
+                            }
+                          },
+                          "right": {
+                            "type": "Literal",
+                            "value": 0,
+                            "raw": "0"
+                          }
+                        }
+                      },
+                      "right": {
+                        "type": "BinaryExpression",
+                        "operator": "<=",
+                        "left": {
+                          "type": "MemberExpression",
+                          "computed": false,
+                          "object": {
+                            "type": "ThisExpression"
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "age"
+                          }
+                        },
+                        "right": {
+                          "type": "Literal",
+                          "value": 99,
+                          "raw": "99"
+                        }
+                      }
+                    },
+                    "prefix": true
+                  },
+                  "consequent": {
+                    "type": "BlockStatement",
+                    "body": [
+                      {
+                        "type": "ThrowStatement",
+                        "argument": {
+                          "type": "NewExpression",
+                          "callee": {
+                            "type": "Identifier",
+                            "name": "Error"
+                          },
+                          "arguments": [
+                            {
+                              "type": "Literal",
+                              "value": "type validate failed: [age]: Number must in range 0 to 99",
+                              "raw": "'type validate failed: [age]: Number must in range 0 to 99'"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "alternate": null
+                },
+                {
+                  "type": "IfStatement",
+                  "test": {
+                    "type": "BinaryExpression",
+                    "operator": "===",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": true,
+                      "object": {
+                        "type": "ArrayExpression",
+                        "elements": [
+                          {
+                            "type": "Literal",
+                            "value": "unknown",
+                            "raw": "'unknown'"
+                          },
+                          {
+                            "type": "Literal",
+                            "value": "男",
+                            "raw": "'男'"
+                          },
+                          {
+                            "type": "Literal",
+                            "value": "女",
+                            "raw": "'女'"
+                          }
+                        ]
+                      },
+                      "property": {
+                        "type": "MemberExpression",
+                        "computed": false,
+                        "object": {
+                          "type": "ThisExpression"
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "gender"
+                        }
+                      }
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "undefined"
+                    }
+                  },
+                  "consequent": {
+                    "type": "BlockStatement",
+                    "body": [
+                      {
+                        "type": "ThrowStatement",
+                        "argument": {
+                          "type": "NewExpression",
+                          "callee": {
+                            "type": "Identifier",
+                            "name": "Error"
+                          },
+                          "arguments": [
+                            {
+                              "type": "Literal",
+                              "value": "type validate failed: [gender]: gender can only choosing from [\" 0 -> unknown  , 1 -> 男  , 2 -> 女  ,\"]",
+                              "raw": "'type validate failed: [gender]: gender can only choosing from [\" 0 -> unknown  , 1 -> 男  , 2 -> 女  ,\"]'"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "alternate": null
+                },
+                {
+                  "type": "IfStatement",
+                  "test": {
+                    "type": "BinaryExpression",
+                    "operator": "===",
+                    "left": {
+                      "type": "MemberExpression",
+                      "computed": true,
+                      "object": {
+                        "type": "ArrayExpression",
+                        "elements": [
+                          {
+                            "type": "Literal",
+                            "value": "unknown",
+                            "raw": "'unknown'"
+                          },
+                          {
+                            "type": "Literal",
+                            "value": "星期一",
+                            "raw": "'星期一'"
+                          },
+                          {
+                            "type": "Literal",
+                            "value": "星期二",
+                            "raw": "'星期二'"
+                          },
+                          {
+                            "type": "Literal",
+                            "value": "星期三",
+                            "raw": "'星期三'"
+                          },
+                          {
+                            "type": "Literal",
+                            "value": "星期四",
+                            "raw": "'星期四'"
+                          },
+                          {
+                            "type": "Literal",
+                            "value": "星期五",
+                            "raw": "'星期五'"
+                          }
+                        ]
+                      },
+                      "property": {
+                        "type": "MemberExpression",
+                        "computed": false,
+                        "object": {
+                          "type": "ThisExpression"
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "weekday"
+                        }
+                      }
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "undefined"
+                    }
+                  },
+                  "consequent": {
+                    "type": "BlockStatement",
+                    "body": [
+                      {
+                        "type": "ThrowStatement",
+                        "argument": {
+                          "type": "NewExpression",
+                          "callee": {
+                            "type": "Identifier",
+                            "name": "Error"
+                          },
+                          "arguments": [
+                            {
+                              "type": "Literal",
+                              "value": "type validate failed: [weekday]: weekday can only choosing from [\" 0 -> unknown  , 1 -> 星期一  , 2 -> 星期二  , 3 -> 星期三  , 4 -> 星期四  , 5 -> 星期五  ,\"]",
+                              "raw": "'type validate failed: [weekday]: weekday can only choosing from [\" 0 -> unknown  , 1 -> 星期一  , 2 -> 星期二  , 3 -> 星期三  , 4 -> 星期四  , 5 -> 星期五  ,\"]'"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "alternate": null
+                }
+              ]
+            },
+            "generator": false,
+            "expression": false,
+            "async": false
+          },
+          "kind": "method",
+          "static": false
+        }
+      ]
+    }
+  },
+  {
+    "type": "ExpressionStatement",
+    "expression": {
+      "type": "AssignmentExpression",
+      "operator": "=",
+      "left": {
+        "type": "MemberExpression",
+        "computed": false,
+        "object": {
+          "type": "Identifier",
+          "name": "module"
+        },
+        "property": {
+          "type": "Identifier",
+          "name": "exports"
+        }
+      },
+      "right": {
+        "type": "Identifier",
+        "name": "User"
+      }
+    }
+  }
+]
