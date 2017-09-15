@@ -6,12 +6,14 @@
 
 const fs = require('fs');
 const EOL = require('os').EOL;
+const path = require('path');
 
 class BaseRender {
   constructor(definition) {
     this.definition = definition;
     this.output = [];
     this.data = {};
+    this.ouputPath = '';
   }
 
   fileName() {
@@ -25,7 +27,11 @@ class BaseRender {
   }
 
   toFile() {
-    fs.writeFileSync(this.fileName(), this.output.join(EOL));
+    if(fs.existsSync(path.resolve(this.ouputPath))){
+      fs.writeFileSync(`${path.resolve(this.ouputPath)}/${this.definition.name}.gen.js`, this.output.join(EOL));
+    }else {
+      fs.writeFileSync(this.fileName(), this.output.join(EOL));
+    }
   }
 }
 

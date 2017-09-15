@@ -13,9 +13,9 @@ const BaseRender = require('./BaseRender');
 let render = {};
 
 class Render extends BaseRender {
-  constructor(definition) {
+  constructor(definition, output) {
     super(definition);
-
+    this.ouputPath = output;
     this.data._name_ = definition.name;
 
     this.data._depends_ = new Set();
@@ -56,7 +56,7 @@ class Render extends BaseRender {
       if (props[k].definition.type.name === 'ref') {
         this.data._depends_.add(`const ${props[k].definition.type.ref.name} = require(\'./${props[k].definition.type.ref.name}.gen\');`);
         output.push(`this.${props[k].name} = new ${props[k].definition.type.ref.name}(options.${props[k].name}) || ${this.getDefaultValue(props[k].definition)};`);
-        let r = new Render(props[k].definition.type.ref);
+        let r = new Render(props[k].definition.type.ref, this.ouputPath);
         r.toFile();
         continue;
       }

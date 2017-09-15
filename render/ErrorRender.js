@@ -9,9 +9,9 @@ const templateBank = require('../tpl/templateBank');
 const EOL = require('os').EOL;
 
 class ErrorRender extends BaseRender {
-  constructor(definition) {
+  constructor(definition, output) {
     super(definition);
-
+    this.ouputPath = output;
     this.AI = {};
     this.output=[];
     this.parse();
@@ -28,8 +28,6 @@ class ErrorRender extends BaseRender {
         this.output.push(tpl[k]);
       }
     }
-
-    this.toFile();
   }
 
   parse(){
