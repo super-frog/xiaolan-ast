@@ -10,14 +10,12 @@ const py = require('frog-lib').pinyin;
 
 const BaseRender = require('./BaseRender');
 
-let render = {};
-
-class Render extends BaseRender {
+class ObjectRender extends BaseRender {
   constructor(definition, output) {
     super(definition);
     this.ouputPath = output;
     this.data._name_ = definition.name;
-
+    this.data._validate_ = 'this.validate();';
     this.data._depends_ = new Set();
 
     this.data._init_ = this.classConstructorBody();
@@ -56,7 +54,7 @@ class Render extends BaseRender {
       if (props[k].definition.type.name === 'ref') {
         this.data._depends_.add(`const ${props[k].definition.type.ref.name} = require(\'./${props[k].definition.type.ref.name}.gen\');`);
         output.push(`this.${props[k].name} = new ${props[k].definition.type.ref.name}(options.${props[k].name}) || ${this.getDefaultValue(props[k].definition)};`);
-        let r = new Render(props[k].definition.type.ref, this.ouputPath);
+        let r = new ObjectRender(props[k].definition.type.ref, this.ouputPath);
         r.toFile();
         continue;
       }
@@ -90,19 +88,6 @@ class Render extends BaseRender {
   }${EOL}`;
   }
 
-
-  renderLine(line, toekn, data) {
-    if (Array.isArray(data) && data.length > 0) {
-      let output = [];
-      for (let k in data) {
-        output.push(line.replace(toekn, data[k]));
-      }
-      return output;
-    } else {
-      return [line.replace(toekn, data)];
-    }
-  }
-
   validateFunc() {
     let props = this.definition.props;
     let output = `validate(){${EOL}`;
@@ -113,7 +98,7 @@ class Render extends BaseRender {
       } else {
         switch (props[k].definition.type.name) {
           case 'string':
-            output += `    if(!((typeof this.${props[k].name} === 'string') && (this.${props[k].name}.length>${props[k].definition.type.length[0]}) && (this.${props[k].name}.length<${props[k].definition.type.length[1]}))){${EOL}`;
+            output += `    if(!((typeof this.${props[k].name} === 'string') && (this.${props[k].name}.length>=${props[k].definition.type.length[0]}) && (this.${props[k].name}.length<=${props[k].definition.type.length[1]}))){${EOL}`;
             output += `      throw new Error('type validate failed: [${props[k].name}]: String length must between ${props[k].definition.type.length[0]} to ${props[k].definition.type.length[1]}');${EOL}`;
             output += `    }${EOL}${EOL}`;
             break;
@@ -125,6 +110,17 @@ class Render extends BaseRender {
           case 'enum':
             output += `    if(['${props[k].definition.type.options.join('\',\'')}'][this.${props[k].name}] === undefined){${EOL}`;
             output += `      throw new Error('type validate failed: [${props[k].name}]: ${props[k].name} can only choosing from ["${this.arrayDisplay(props[k].definition.type.options)}"]');${EOL}`;
+            output += `    }${EOL}${EOL}`;
+            break;
+          case 'array':
+            output += `    if(!(Array.isArray(this.${props[k].name}) && (this.${props[k].name}.length===0 || typeof this.${props[k].name}[0] === '${this.typeMap(props[k].definition.type.member.name)}'))){${EOL}`;
+            output += `      throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}]');${EOL}`;
+            output += `    }${EOL}${EOL}`;
+            break;
+          case 'ref':
+            let refName = props[k].definition.type.ref.name;
+            output += `    if(!(this.${props[k].name} instanceof ${refName} )){${EOL}`;
+            output += `      throw new Error('type validate failed: [${props[k].name}]: must be instance of  [${refName}]');${EOL}`;
             output += `    }${EOL}${EOL}`;
             break;
           default:
@@ -147,12 +143,26 @@ class Render extends BaseRender {
       if (props[k].definition.in === undefined) {
         continue;
       }
-      output += `    options.${props[k].name} = req.${props[k].definition.in} && req.${props[k].definition.in}.${props[k].name} || ${this.getDefaultValue(props[k].definition)};${EOL}`;
+      output += `    options.${props[k].name} = req.${props[k].definition.in} && (${this.formatter(props[k].definition.type.name)}req.${props[k].definition.in}.${props[k].name}) || ${this.getDefaultValue(props[k].definition)};${EOL}`;
     }
     output += `    return new ${className}(options);${EOL}`;
     output += `  }${EOL}`;
 
     return output;
+  }
+
+  formatter(type){
+    switch (type){
+      case 'string':
+        return `'' + `;
+        break;
+      case 'integer':
+        return `1 * `;
+        break;
+      default:
+        return '';
+        break;
+    }
   }
 
   arrayDisplay(arr) {
@@ -163,6 +173,17 @@ class Render extends BaseRender {
     return output;
   }
 
+  typeMap(name){
+    switch (name){
+      case 'number':
+      case 'integer':
+      case 'float':
+        return 'number';
+        break;
+      default:
+        return name;
+    }
+  }
 }
 
-module.exports = Render;
+module.exports = ObjectRender;

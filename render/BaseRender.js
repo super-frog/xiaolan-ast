@@ -17,7 +17,7 @@ class BaseRender {
   }
 
   fileName() {
-    return `${process.cwd()}/${this.definition.name}.gen.js`;
+    return `${process.cwd()}/${this.data._name_}.gen.js`;
   }
 
   findToken(line) {
@@ -26,9 +26,21 @@ class BaseRender {
     return line.match(patten);
   }
 
+  renderLine(line, toekn, data) {
+    if (Array.isArray(data) && data.length > 0) {
+      let output = [];
+      for (let k in data) {
+        output.push(line.replace(toekn, data[k]));
+      }
+      return output;
+    } else {
+      return [line.replace(toekn, data)];
+    }
+  }
+
   toFile() {
     if(fs.existsSync(path.resolve(this.ouputPath))){
-      fs.writeFileSync(`${path.resolve(this.ouputPath)}/${this.definition.name}.gen.js`, this.output.join(EOL));
+      fs.writeFileSync(`${path.resolve(this.ouputPath)}/${this.data._name_}.gen.js`, this.output.join(EOL));
     }else {
       fs.writeFileSync(this.fileName(), this.output.join(EOL));
     }

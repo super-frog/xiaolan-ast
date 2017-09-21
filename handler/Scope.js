@@ -159,6 +159,9 @@ class Scope {
               elements: declarations[k].init.elements[0] ? typeof declarations[k].init.elements[0].value : 'unknown',
             };
             break;
+          case 'BinaryExpression':
+
+            break;
         }
       }
       declare && (this.var[declarations[k].id.name] = declare);

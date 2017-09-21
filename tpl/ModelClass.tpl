@@ -1,11 +1,12 @@
 "use strict";
-
 _depends_
 
+_fieldmap_
+_keymap_
+
 class _name_ {
-  constructor(options={}){
+  constructor(data={}){
     _init_
-    _validate_
   }
 
   _method_

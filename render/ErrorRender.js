@@ -12,6 +12,7 @@ class ErrorRender extends BaseRender {
   constructor(definition, output) {
     super(definition);
     this.ouputPath = output;
+    this.data._name_='Error';
     this.AI = {};
     this.output=[];
     this.parse();
