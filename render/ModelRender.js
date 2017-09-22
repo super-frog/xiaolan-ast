@@ -11,6 +11,7 @@ const py = require('frog-lib').pinyin;
 class ModelRender extends BaseRender {
   constructor(definition, output) {
     super(definition);
+
     this.definition = definition;
     this.ouputPath = output;
     this.data._name_ = py.camel(definition.name, true);
@@ -55,10 +56,11 @@ class ModelRender extends BaseRender {
     return output;
   }
 
-  searchFunc(){
+  searchFunc() {
     let output = [];
-    if(this.definition.primary.key){
-      let func = `static findBy${py.camel(this.definition.primary.key,true)}(v){${EOL}`;
+    if (this.definition.primary.key) {
+      let func = `//@row${EOL}`;
+      func += `  static fetchBy${py.camel(this.definition.primary.key, true)}(v){${EOL}`;
       func += `    let conn = Connection('default').conn;${EOL}`;
       func += `    let sql = 'select * from ${this.definition.name} where ${this.definition.primary.fieldName}=:v limit 1';${EOL}`;
       func += `    return new Promise((resolved, rejected) => {
@@ -66,21 +68,22 @@ class ModelRender extends BaseRender {
         if(e){
           rejected(e);
         }else{
-          resolved(r[0]);
+          resolved(new ${this.data._name_}(r[0]));
         }
       });
     });${EOL}`;
       func += `  }${EOL}`;
       output.push(func);
     }
-    if(Object.keys(this.definition.index).length){
-      for(let k in this.definition.index){
-        let func = `static findBy`;
+    if (Object.keys(this.definition.index).length) {
+      for (let k in this.definition.index) {
+        let func = `//@list${EOL}`;
+        func += `  static fetchBy`;
         let args = [];
         let where = [];
         let params = [];
-        for(let i in this.definition.index[k]){
-          func += `${py.camel(this.definition.index[k][i].key,true)}`;
+        for (let i in this.definition.index[k]) {
+          func += `${py.camel(this.definition.index[k][i].key, true)}`;
           args.push(this.definition.index[k][i].key);
           where.push(`${this.definition.index[k][i].fieldName}=:${this.definition.index[k][i].key}`);
           params.push(`${this.definition.index[k][i].key}: ${this.definition.index[k][i].key}`);
@@ -95,7 +98,11 @@ class ModelRender extends BaseRender {
         if(e){
           rejected(e);
         }else{
-          resolved(r);
+          let result = [];
+          for(let k in r) {
+            result.push(new ${this.data._name_}(r[k]));
+          }
+          resolved(result);
         }
       });
     });${EOL}`;
@@ -103,14 +110,15 @@ class ModelRender extends BaseRender {
         output.push(func)
       }
     }
-    if(Object.keys(this.definition.uniq).length){
-      for(let k in this.definition.uniq){
-        let func = `static findBy`;
+    if (Object.keys(this.definition.uniq).length) {
+      for (let k in this.definition.uniq) {
+        let func = `//@row${EOL}`;
+        func += `  static fetchBy`;
         let args = [];
         let where = [];
         let params = [];
-        for(let i in this.definition.uniq[k]){
-          func += `${py.camel(this.definition.uniq[k][i].key,true)}`;
+        for (let i in this.definition.uniq[k]) {
+          func += `${py.camel(this.definition.uniq[k][i].key, true)}`;
           args.push(this.definition.uniq[k][i].key);
           where.push(`${this.definition.uniq[k][i].fieldName}=:${this.definition.uniq[k][i].key}`);
           params.push(`${this.definition.uniq[k][i].key}: ${this.definition.uniq[k][i].key}`);
@@ -125,7 +133,7 @@ class ModelRender extends BaseRender {
         if(e){
           rejected(e);
         }else{
-          resolved(r);
+          resolved(new ${this.data._name_}(r[0]));
         }
       });
     });${EOL}`;
@@ -211,13 +219,13 @@ class ModelRender extends BaseRender {
     output += '      let sql = `insert into ${this.tableName} set ';
     let fieldSet = this.definition.fieldSet;
     for (let k in fieldSet) {
-      if(fieldSet[k].autoIncrease === true){
+      if (fieldSet[k].autoIncrease === true) {
         continue;
       }
       output += `${fieldSet[k].fieldName}=:${k},`;
     }
-    output = output.substr(0,output.length-1);
-    output += '`;'+EOL;
+    output = output.substr(0, output.length - 1);
+    output += '`;' + EOL;
     output += `      conn.query({sql: sql,params:this.data()},(e, r) => {${EOL}`;
     output += `        if(e) {${EOL}`;
     output += `          rejected(e);${EOL}`;
@@ -241,14 +249,14 @@ class ModelRender extends BaseRender {
     let fieldSet = this.definition.fieldSet;
     let values = [];
     for (let k in fieldSet) {
-      if(fieldSet[k].autoIncrease === true){
+      if (fieldSet[k].autoIncrease === true) {
         continue;
       }
       values.push(`${fieldSet[k].fieldName}=:${k}`)
     }
     output += values.join(',');
     let primary = this.definition.primary.fieldName;
-    output += ' where '+primary+'=\'${this.'+this.definition.primary.key+'}\'`;'+EOL;
+    output += ' where ' + primary + '=\'${this.' + this.definition.primary.key + '}\'`;' + EOL;
     output += `      let data = this.data();${EOL}`;
     output += `      delete data.${this.definition.primary.key};${EOL}`;
     output += `      conn.query({sql: sql,params:data},(e, r) => {${EOL}`;
@@ -263,10 +271,9 @@ class ModelRender extends BaseRender {
     return output;
   }
 
-  create(){
+  create() {
     let output = `static create(data){${EOL}`;
-    output += `    let u = new ${py.camel(this.definition.name, true)}(data);${EOL}`;
-    output += `    return u.save();${EOL}`;
+    output += `    return new ${this.data._name_}(data);${EOL}`;
     output += `  }${EOL}`;
     return output;
   }

@@ -44,6 +44,7 @@ class BaseRender {
     }else {
       fs.writeFileSync(this.fileName(), this.output.join(EOL));
     }
+    console.log('File generated in : '+this.fileName()+ EOL);
   }
 }
 

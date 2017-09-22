@@ -26,8 +26,7 @@ class Scope {
       ast = file;
       this.dir = '';
     }
-    console.log(JSON.stringify(ast));process.exit(-1);
-
+    // console.log(JSON.stringify(ast));process.exit(-1);
     this.def = {};
     this.var = {};
     this.ret = [];
@@ -53,7 +52,7 @@ class Scope {
           break;
         case 'ReturnStatement':
           //console.log(JSON.stringify(ast[k]));
-          this.ret.push(this.returnStatement(ast[k]));
+          this.ret = this.ret.concat(this.returnStatement(ast[k]));
           break;
         case 'ClassDeclaration':
           this.def['@' + ast[k].id.name] = this.getClassStruct(ast[k]);
@@ -184,9 +183,37 @@ class Scope {
         if (def && def.type === 'func') {
           return def.scope.ret;
         } else {
-
           return this.getDefStruct(this.getIdentifierDef(stat.argument.name));
         }
+      case 'Literal':
+        return this.getValueStruct(stat.argument);
+        break;
+      case 'MemberExpression':
+        //todo
+        let id;
+        let [object, property] = [stat.argument.object.type === 'ThisExpression' ? 'this' : stat.argument.object.name, stat.argument.property.name];
+        if (object === 'this') {
+          id = property;
+        } else {
+          id = `${stat.argument.object.name}.${stat.argument.property.name}`;
+        }
+
+        //todo 不是module的情况
+        if (this.parent.def['@' + object] && this.parent.def['@' + object].type === 'module') {
+          this.def['@' + id] = this.parent.def['@' + object].scope.def['@' + property].scope.ret || {};
+        }else {
+          this.def['@' + id] = {
+            type: 'unknown',
+            value: {
+              object,
+              property,
+            }
+          };
+        }
+
+
+        return this.def['@' + id];
+        break;
       default:
         return {
           type: 'unknown',
@@ -235,7 +262,7 @@ class Scope {
         break;
       case 'AssignmentExpression':
         if (this.isExportExpression(expression.expression)) {
-          this.ret.push(this.getRightStruct(expression.expression.right));
+          this.ret= this.ret.concat(this.getRightStruct(expression.expression.right));
         } else if (this.isThisExpression(expression.expression)) {
           this.def['@' + expression.expression.left.property.name] = this.getRightStruct(expression.expression.right);
           this.var[expression.expression.left.property.name] = expression.expression.left.property.name;
@@ -297,23 +324,28 @@ class Scope {
 
   //从当前scope的定义里获取定义的返回结构
   getDefStruct(name) {
-    if (!this.def['@' + name]) {
-      return name;
-    }
     let struct;
-    switch (this.def['@' + name].type) {
-      case 'func':
-        struct = this.def['@' + name].scope.ret;
-        break;
-      case 'module':
-        struct = this.def['@' + name].scope.ret;
-        break;
-      case 'class':
-        struct = this.def['@' + name].scope.ret;
-        break;
-      default:
-        struct = this.def['@' + name];
-        break
+    if (!this.def['@' + name]) {
+      struct = {};
+    }else {
+
+      switch (this.def['@' + name].type) {
+        case 'func':
+          struct = this.def['@' + name].scope.ret;
+          break;
+        case 'module':
+          struct = this.def['@' + name].scope.ret;
+          break;
+        case 'class':
+          struct = this.def['@' + name].scope.ret;
+          break;
+        case 'object':
+          struct = this.def['@' + name];
+          break;
+        default:
+          struct = this.def['@' + name];
+          break
+      }
     }
     if (typeof struct === 'string' && this.def['@' + struct]) {
       return this.getDefStruct(struct);

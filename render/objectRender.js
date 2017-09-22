@@ -143,7 +143,7 @@ class ObjectRender extends BaseRender {
       if (props[k].definition.in === undefined) {
         continue;
       }
-      output += `    options.${props[k].name} = req.${props[k].definition.in} && (${this.formatter(props[k].definition.type.name)}req.${props[k].definition.in}.${props[k].name}) || ${this.getDefaultValue(props[k].definition)};${EOL}`;
+      output += `    options.${props[k].name} = (req.${props[k].definition.in} && req.${props[k].definition.in}.${props[k].name}) ? (${this.formatter(props[k].definition.type.name)}req.${props[k].definition.in}.${props[k].name}) : ${this.getDefaultValue(props[k].definition)};${EOL}`;
     }
     output += `    return new ${className}(options);${EOL}`;
     output += `  }${EOL}`;

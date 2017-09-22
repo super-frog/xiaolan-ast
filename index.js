@@ -4,10 +4,13 @@
 
 'use strict';
 const path = require('path');
+
 const ErrorDefinition = require('./handler/ErrorDefinition');
 const ObjectDefinition = require('./handler/ObjectDefinition');
 const RouteDefinition = require('./handler/RouteDefinition');
 const ModelRender = require('./render/ModelRender');
+const JsocDriver = require('./handler/JsocDriver');
+
 
 let index = {};
 
@@ -30,8 +33,11 @@ index.findHandler = (file) => {
   return RouteDefinition(path.resolve(file));
 };
 
+index.genJsoc = (projectRoot) => {
+  projectRoot = path.resolve(projectRoot);
+  let jsoc = new JsocDriver(projectRoot);
+  
+};
+
 module.exports = index;
 
-//console.log(JSON.stringify(index.genModel('./demo/model/User.js', './tests').toFile()));process.exit(0);
-// index.genClass('./demo/User.js', './tests');
-// console.log(JSON.stringify(index.findHandler('./demo/routes.js')));process.exit(-1);
