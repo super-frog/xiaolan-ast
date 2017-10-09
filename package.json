@@ -1,6 +1,6 @@
 {
   "name": "xiaolan-ast",
-  "version": "1.1.9",
+  "version": "1.2.2",
   "main": "index.js",
   "description": "",
   "scripts": {
@@ -13,6 +13,7 @@
     "colors": "^1.1.2",
     "esprima": "^4.0.0",
     "frog-lib": "^1.0.3",
+    "xiaolan": "^1.5.0",
     "xiaolan-db": "^1.2.0",
     "xiaolan-router": "^1.0.1"
   },

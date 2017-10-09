@@ -7,17 +7,22 @@
 const esprima = require('esprima');
 const fs = require('fs');
 const path = require('path');
+const astObject = require('../lib/astObject');
+const util = require('util');
 
 class Scope {
   constructor(name, file, parent) {
     this.AI = 1;
     this.name = name;
+
     let ast;
     if (typeof file === 'string') {
       this.file = path.resolve(file);
       this.dir = path.dirname(this.file);
       try {
-        ast = esprima.parseScript(fs.readFileSync(this.file).toString()).body;
+        ast = esprima.parseScript(fs.readFileSync(this.file).toString(),{
+          attachComment:true,
+        }).body;
       } catch (e) {
         console.log(this.file, e.message);
         process.exit(-1);
@@ -26,7 +31,9 @@ class Scope {
       ast = file;
       this.dir = '';
     }
-    // console.log(JSON.stringify(ast));process.exit(-1);
+
+    this.desc = this.getDesc(ast) || name;
+    //console.log(JSON.stringify(ast.body));process.exit(0);//todo
     this.def = {};
     this.var = {};
     this.ret = [];
@@ -35,6 +42,10 @@ class Scope {
       writable: true,
     });
     this.parent = parent;
+    Object.defineProperty(this, 'ast', {
+      writable: true,
+    });
+    this.ast = ast;
     this.run(ast);
   }
 
@@ -80,6 +91,27 @@ class Scope {
           this.forStatement(ast[k]);
           break;
       }
+    }
+  }
+
+  astObjects(){
+    let result = {};
+    for(let k in this.ast){
+      let item = this.ast[k];
+      if(item.type === 'VariableDeclaration'){
+        result[item.declarations[0].id.name] = astObject(item.declarations[0].id.name, item.declarations[0].init.properties);
+      }
+    }
+    return result;
+  }
+
+  // 获取第一行的面熟名字
+  getDesc(body){
+    let firstLine = body[0];
+    if(firstLine && firstLine.leadingComments && firstLine.leadingComments[0]){
+      return firstLine.leadingComments[0].value;
+    }else{
+      return null;
     }
   }
 
@@ -174,6 +206,12 @@ class Scope {
   //专门处理返回语句
   returnStatement(stat) {
     switch (stat.argument.type) {
+      case 'ArrayExpression':
+        return {
+          type: 'array',
+          value: stat.argument.elements[0]?this.returnStatement({argument:stat.argument.elements[0]}):'unknown',
+        };
+        break;
       case 'NewExpression':
         return this.getIdentifierDef(stat.argument.callee.name);
         break;
@@ -204,10 +242,7 @@ class Scope {
         }else {
           this.def['@' + id] = {
             type: 'unknown',
-            value: {
-              object,
-              property,
-            }
+            value: id
           };
         }
 
@@ -262,6 +297,7 @@ class Scope {
         break;
       case 'AssignmentExpression':
         if (this.isExportExpression(expression.expression)) {
+          expression.expression.right.exports = true;
           this.ret= this.ret.concat(this.getRightStruct(expression.expression.right));
         } else if (this.isThisExpression(expression.expression)) {
           this.def['@' + expression.expression.left.property.name] = this.getRightStruct(expression.expression.right);
@@ -298,6 +334,7 @@ class Scope {
           type: typeof right.value,
           value: right.value,
         };
+        return result;
         break;
       case 'CallExpression':
         if (this.def['@' + right.callee.name]) {
@@ -315,11 +352,10 @@ class Scope {
         return (this.parent.def ? this.parent.getDefStruct(this.getIdentifierDef(right.callee.name)) : null) || this.getIdentifierDef(right.callee.name);
         break;
       case 'Identifier':
+        this.def['@'+this.getIdentifierDef(right.name)].exports = right.exports;
         return this.getDefStruct(this.getIdentifierDef(right.name));
         break;
-
     }
-    return result;
   }
 
   //从当前scope的定义里获取定义的返回结构
@@ -471,6 +507,7 @@ class Scope {
   getFuncDef(name, def) {
 
     let result = {};
+    result['exports'] = def.exports;
     result['type'] = 'func';
     result['args'] = [];
     for (let k in def.params) {

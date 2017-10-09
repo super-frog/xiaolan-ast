@@ -12,6 +12,7 @@ const BaseRender = require('./BaseRender');
 
 class ObjectRender extends BaseRender {
   constructor(definition, output) {
+
     super(definition);
     this.ouputPath = output;
     this.data._name_ = definition.name;
@@ -49,7 +50,6 @@ class ObjectRender extends BaseRender {
   classConstructorBody() {
     let props = this.definition.props;
     let output = [];
-
     for (let k in props) {
       if (props[k].definition.type.name === 'ref') {
         this.data._depends_.add(`const ${props[k].definition.type.ref.name} = require(\'./${props[k].definition.type.ref.name}.gen\');`);
@@ -70,7 +70,7 @@ class ObjectRender extends BaseRender {
         return `'${fieldDefinition.defaultValue || ''}'`;
         break;
       case 'enum':
-      case 'integer':
+      case 'number':
         return `${fieldDefinition.defaultValue || 0}`;
         break;
       case 'array':
@@ -102,7 +102,7 @@ class ObjectRender extends BaseRender {
             output += `      throw new Error('type validate failed: [${props[k].name}]: String length must between ${props[k].definition.type.length[0]} to ${props[k].definition.type.length[1]}');${EOL}`;
             output += `    }${EOL}${EOL}`;
             break;
-          case 'integer':
+          case 'number':
             output += `    if(!(Number.isInteger(this.${props[k].name}) && (this.${props[k].name}>=${props[k].definition.type.range[0]}) && (this.${props[k].name}<=${props[k].definition.type.range[1]}))){${EOL}`;
             output += `      throw new Error('type validate failed: [${props[k].name}]: Number must in range ${props[k].definition.type.range[0]} to ${props[k].definition.type.range[1]}');${EOL}`;
             output += `    }${EOL}${EOL}`;
@@ -156,7 +156,7 @@ class ObjectRender extends BaseRender {
       case 'string':
         return `'' + `;
         break;
-      case 'integer':
+      case 'number':
         return `1 * `;
         break;
       default:
@@ -176,7 +176,6 @@ class ObjectRender extends BaseRender {
   typeMap(name){
     switch (name){
       case 'number':
-      case 'integer':
       case 'float':
         return 'number';
         break;

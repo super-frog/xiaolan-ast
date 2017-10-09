@@ -3,7 +3,7 @@ const User = {
   //用户名 string required in:body
   //用於在前台頁面展示
   name:'doge',
-  //年龄 int:0,99 in:body
+  //年龄 number:0,99 in:body
   //註冊用戶的年齡
   //默認18歲
   age:18,

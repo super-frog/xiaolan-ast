@@ -8,6 +8,7 @@ const path = require('path');
 const ErrorDefinition = require('./handler/ErrorDefinition');
 const ObjectDefinition = require('./handler/ObjectDefinition');
 const RouteDefinition = require('./handler/RouteDefinition');
+const HelperDefinition = require('./handler/HelperDefinition');
 const ModelRender = require('./render/ModelRender');
 const JsocDriver = require('./handler/JsocDriver');
 
@@ -36,7 +37,11 @@ index.findHandler = (file) => {
 index.genJsoc = (projectRoot) => {
   projectRoot = path.resolve(projectRoot);
   let jsoc = new JsocDriver(projectRoot);
-  
+  //todo
+};
+
+index.genHelper = (file) => {
+  return HelperDefinition(path.resolve(file));
 };
 
 module.exports = index;

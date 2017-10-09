@@ -3,7 +3,6 @@
  */
 
 'use strict';
-const esprima = require('esprima');
 const fs = require('fs');
 
 module.exports = (file)=>{
