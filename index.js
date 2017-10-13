@@ -27,6 +27,7 @@ index.genClass = (file, output) => {
 
 index.genModel = (file, output) => {
   let tableDefinition = require(path.resolve(file));
+
   return new ModelRender(tableDefinition,output);
 };
 

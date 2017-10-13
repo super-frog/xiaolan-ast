@@ -35,10 +35,11 @@ class JsocDriver {
     for (let k in routes) {
       let scope;
       let returns = [];
+      
       for (let i in routes[k].handlers) {
         let handler = `${this.projectRoot}/handlers/${routes[k].handlers[i]}.js`;
         scope = new Scope(routes[k].handlers[i], handler);
-        returns = returns.concat(scope.ret);
+        returns = returns.concat(this.fattenReturn(scope.ret));
       }
 
       let jsocResponse = {
@@ -71,6 +72,25 @@ class JsocDriver {
       };
     }
 
+  }
+
+  fattenReturn(ret){
+    
+    let result = [];
+    
+    for(let k in ret) {
+
+      switch (ret[k].type) {
+        case 'func':
+          result = result.concat(this.fattenReturn(ret[k].scope.ret));
+          break;
+
+        default:
+          result.push(ret[k]);
+          break;
+      }
+    }
+    return result;
   }
 
   jsocRequest(scope,route){
@@ -163,12 +183,15 @@ class JsocDriver {
   formatReturn(ret) {
     let result = {};
     switch (ret.type) {
+      case 'func':
+        
+        break;
       case 'unknown':
         result = this.definitions[ret.value];
         break;
       case 'object':
         for (let k in ret.value) {
-          result[k] = ret.value[k].type;
+          result[k] = ret.value[k].value.type;
         }
         break;
       case 'array':
@@ -193,5 +216,4 @@ class JsocDriver {
 
 }
 
-module
-  .exports = JsocDriver;
+module.exports = JsocDriver;

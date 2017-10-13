@@ -1,7 +1,7 @@
 //测试接口
 
 const Robot = {
-  //名字 string:0,20 in:query
+  //名字 string:0,20 in:query require
   name: 'Robot Xiaolan',
   //年龄 number:0,99 in:body
   //註冊用戶的年齡

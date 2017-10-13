@@ -1,0 +1,86 @@
+{
+  "host": "",
+  "projectRoot": "/Users/lanhao/test/kk2",
+  "definitions": {
+    "error.COMMON_ERROR": {
+      "code": 1001500001,
+      "message": "通用错误(COMMON_ERROR)",
+      "data": null
+    }
+  },
+  "apis": {
+    "index": {
+      "name": "index",
+      "desc": "index",
+      "group": "",
+      "request": {
+        "method": "get",
+        "uri": "/",
+        "query": {},
+        "params": {},
+        "body": {
+          "name": {
+            "_type": "string",
+            "_default": "",
+            "_desc": "名字 ",
+            "_length": [
+              0,
+              64
+            ]
+          },
+          "age": {
+            "_type": "number",
+            "_default": 0,
+            "_desc": "年龄 ",
+            "_range": [
+              0,
+              99
+            ]
+          },
+          "mobile": {
+            "_type": "string",
+            "_default": "",
+            "_desc": "电话 ",
+            "_length": [
+              1,
+              11
+            ]
+          }
+        }
+      },
+      "response": {
+        "body": {
+          "success": [
+            {
+              "code": {
+                "_type": "number",
+                "_assert": 0
+              },
+              "data": {
+                "id": {
+                  "_type": "string"
+                },
+                "name": {
+                  "_type": "string"
+                },
+                "age": {
+                  "_type": "string"
+                },
+                "gender": {
+                  "_type": "string"
+                },
+                "mobile": {
+                  "_type": "string"
+                }
+              },
+              "message": {
+                "_type": "string"
+              }
+            }
+          ],
+          "failed": []
+        }
+      }
+    }
+  }
+}

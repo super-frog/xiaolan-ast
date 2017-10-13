@@ -12,7 +12,6 @@ const util = require('util');
 
 class Scope {
   constructor(name, file, parent) {
-    this.AI = 1;
     this.name = name;
 
     let ast;
@@ -20,8 +19,8 @@ class Scope {
       this.file = path.resolve(file);
       this.dir = path.dirname(this.file);
       try {
-        ast = esprima.parseScript(fs.readFileSync(this.file).toString(),{
-          attachComment:true,
+        ast = esprima.parseScript(fs.readFileSync(this.file).toString(), {
+          attachComment: true,
         }).body;
       } catch (e) {
         console.log(this.file, e.message);
@@ -33,7 +32,7 @@ class Scope {
     }
 
     this.desc = this.getDesc(ast) || name;
-    //console.log(JSON.stringify(ast.body));process.exit(0);//todo
+
     this.def = {};
     this.var = {};
     this.ret = [];
@@ -42,14 +41,23 @@ class Scope {
       writable: true,
     });
     this.parent = parent;
+    if(parent){
+      this.def = Object.assign(this.def, this.parent.def);
+    }
     Object.defineProperty(this, 'ast', {
       writable: true,
     });
+    Object.defineProperty(this, 'AI', {
+      writable: true,
+    });
+    this.AI = 1;
     this.ast = ast;
+    //console.log(JSON.stringify(ast));process.exit(0);//todo
     this.run(ast);
   }
 
   run(ast) {
+
     for (let k in ast) {
       switch (ast[k].type) {
         case 'VariableDeclaration':
@@ -75,7 +83,6 @@ class Scope {
               for (let k in this.parent.def) {
                 this.def[k] = this.def[k] || Object.assign({}, this.parent.def[k]);
               }
-              //this.def = Object.assign(this.parent.def,this.def);
             }
           }
           this.def['@' + ast[k].key.name] = this.getMethodDef(ast[k]);
@@ -87,18 +94,18 @@ class Scope {
           this.whileStatement(ast[k]);
           break;
         case 'ForStatement':
-          
+
           this.forStatement(ast[k]);
           break;
       }
     }
   }
 
-  astObjects(){
+  astObjects() {
     let result = {};
-    for(let k in this.ast){
+    for (let k in this.ast) {
       let item = this.ast[k];
-      if(item.type === 'VariableDeclaration'){
+      if (item.type === 'VariableDeclaration') {
         result[item.declarations[0].id.name] = astObject(item.declarations[0].id.name, item.declarations[0].init.properties);
       }
     }
@@ -106,18 +113,18 @@ class Scope {
   }
 
   // 获取第一行的面熟名字
-  getDesc(body){
+  getDesc(body) {
     let firstLine = body[0];
-    if(firstLine && firstLine.leadingComments && firstLine.leadingComments[0]){
+    if (firstLine && firstLine.leadingComments && firstLine.leadingComments[0]) {
       return firstLine.leadingComments[0].value;
-    }else{
+    } else {
       return null;
     }
   }
 
   //For
-  forStatement(statement){
-    let scope = new Scope('while',statement.body.body, this);
+  forStatement(statement) {
+    let scope = new Scope('while', statement.body.body, this);
     if (scope.ret.length) {
       this.ret = this.ret.concat(scope.ret);
     }
@@ -125,7 +132,7 @@ class Scope {
 
   //处理while
   whileStatement(statement) {
-    let scope = new Scope('while',statement.body.body, this);
+    let scope = new Scope('while', statement.body.body, this);
     if (scope.ret.length) {
       this.ret = this.ret.concat(scope.ret);
     }
@@ -151,11 +158,10 @@ class Scope {
 
   variableDeclaration(declaration) {
     let declarations = declaration.declarations;
+
     for (let k in declarations) {
       let declare = {};
       if (declarations[k].init) {
-
-
         switch (declarations[k].init.type) {
           case 'Literal':
             this.def['@' + declarations[k].id.name] = {
@@ -172,7 +178,12 @@ class Scope {
             declare = declarations[k].id.name;
             break;
           case 'CallExpression':
+
             declare = this.getReturnStruct(declarations[k].init, declarations[k].id.name);
+
+            if(typeof declare!=='string') {
+              this.def['@' + declarations[k].id.name] = declare;
+            }
             break;
           case 'Identifier':
             declare = this.getIdentifierDef(declarations[k].init.name);
@@ -182,6 +193,7 @@ class Scope {
               type: 'Identifier',
               name: declarations[k].id.name,
             };
+
             declare = this.functionDeclaration(declarations[k].init);
             break;
           case 'ArrayExpression':
@@ -205,11 +217,26 @@ class Scope {
 
   //专门处理返回语句
   returnStatement(stat) {
+    if(stat.leadingComments && stat.leadingComments[0] && ['@row', '@list', '@true'].includes(stat.leadingComments[0].value)){
+      if(stat.leadingComments[0].value === '@row'){
+        return this.getClassRet(this.parent);
+      }else if (stat.leadingComments[0].value === '@list'){
+        return {
+          type: 'array',
+          value: this.getClassRet(this.parent),
+        };
+      }else if (stat.leadingComments[0].value === '@true'){
+        return {
+          type: 'Literal',
+          value: true
+        };
+      }
+    }
     switch (stat.argument.type) {
       case 'ArrayExpression':
         return {
           type: 'array',
-          value: stat.argument.elements[0]?this.returnStatement({argument:stat.argument.elements[0]}):'unknown',
+          value: stat.argument.elements[0] ? this.returnStatement({argument: stat.argument.elements[0]}) : 'unknown',
         };
         break;
       case 'NewExpression':
@@ -217,37 +244,34 @@ class Scope {
         break;
       case 'Identifier':
         let def = this.def['@' + this.getIdentifierDef(stat.argument.name)];
+        return this.getDefStruct(this.getIdentifierDef(stat.argument.name));
 
-        if (def && def.type === 'func') {
-          return def.scope.ret;
-        } else {
-          return this.getDefStruct(this.getIdentifierDef(stat.argument.name));
-        }
       case 'Literal':
         return this.getValueStruct(stat.argument);
         break;
       case 'MemberExpression':
-        //todo
         let id;
         let [object, property] = [stat.argument.object.type === 'ThisExpression' ? 'this' : stat.argument.object.name, stat.argument.property.name];
+
         if (object === 'this') {
           id = property;
         } else {
           id = `${stat.argument.object.name}.${stat.argument.property.name}`;
         }
 
-        //todo 不是module的情况
+
         if (this.parent.def['@' + object] && this.parent.def['@' + object].type === 'module') {
-          this.def['@' + id] = this.parent.def['@' + object].scope.def['@' + property].scope.ret || {};
-        }else {
+          //this.def['@' + id] = this.parent.def['@' + object].scope.def['@' + property].scope.ret || {};
+        } else {
           this.def['@' + id] = {
             type: 'unknown',
             value: id
           };
         }
-
-
         return this.def['@' + id];
+        break;
+      case 'CallExpression':
+        return this.getCalleeStruct(stat.argument.callee);
         break;
       default:
         return {
@@ -264,6 +288,7 @@ class Scope {
     scope.file = this.file;
     let tmpDef = {};
     scope.ret = this.getClassRet(scope);
+    scope.def['@' + classDeclare.id.name] = scope.ret;
     return {
       type: 'class',
       scope: scope,
@@ -276,7 +301,10 @@ class Scope {
     for (let k in scope.var) {
       result[k] = scope.def['@' + scope.var[k]];
     }
-    return result;
+    return {
+      type: 'object',
+      value: result
+    };
   }
 
   //当一个scope是一个函数体时,需要调用此方法在内部模拟声明参数变量
@@ -298,7 +326,7 @@ class Scope {
       case 'AssignmentExpression':
         if (this.isExportExpression(expression.expression)) {
           expression.expression.right.exports = true;
-          this.ret= this.ret.concat(this.getRightStruct(expression.expression.right));
+          this.ret = this.ret.concat(this.getRightStruct(expression.expression.right));
         } else if (this.isThisExpression(expression.expression)) {
           this.def['@' + expression.expression.left.property.name] = this.getRightStruct(expression.expression.right);
           this.var[expression.expression.left.property.name] = expression.expression.left.property.name;
@@ -307,10 +335,33 @@ class Scope {
             this.parent.var[expression.expression.left.property.name] = expression.expression.left.property.name;
           }
         } else {
+
           this.def['@' + expression.expression.left.name] = this.getRightStruct(expression.expression.right);
           this.var[expression.expression.left.name] = expression.expression.left.name;
         }
 
+        break;
+    }
+  }
+
+  getCalleeStruct(callee) {
+    switch (callee.type) {
+      case 'MemberExpression':
+
+        let object = this.getDefStruct(callee.object.name);
+
+        let innerScope = object.scope.scope;
+        let method = innerScope.def['@' + callee.property.name];
+        return method.scope.ret[0];
+        break;
+      default:
+        if (this.def['@' + right.callee.name]) {
+          return this.getDefStruct(right.callee.name);
+        }
+        return {
+          type: 'Identify',
+          value:right.callee.name
+        };
         break;
     }
   }
@@ -323,24 +374,26 @@ class Scope {
           type: 'Identifier',
           name: 'Arrow' + (this.AI++),
         };
+
         this.functionDeclaration(right);
+
         return this.getDefStruct(this.getIdentifierDef(right.id.name));
         break;
-      case  'LogicalExpression':
+      case 'LogicalExpression':
         return this.getLogicalStruct(right);
         break;
       case 'Literal':
         result = {
-          type: typeof right.value,
-          value: right.value,
+          type: 'Literal',
+          value:{
+            type: typeof right.value,
+            value: right.value,
+          },
         };
         return result;
         break;
       case 'CallExpression':
-        if (this.def['@' + right.callee.name]) {
-          return this.getDefStruct(right.callee.name);
-        }
-        return right.callee.name;
+        return this.getCalleeStruct(right.callee);
         break;
       case 'ArrayExpression':
         return {
@@ -352,40 +405,29 @@ class Scope {
         return (this.parent.def ? this.parent.getDefStruct(this.getIdentifierDef(right.callee.name)) : null) || this.getIdentifierDef(right.callee.name);
         break;
       case 'Identifier':
-        this.def['@'+this.getIdentifierDef(right.name)].exports = right.exports;
+        this.def['@' + this.getIdentifierDef(right.name)].exports = right.exports;
         return this.getDefStruct(this.getIdentifierDef(right.name));
+        break;
+      case 'ObjectExpression':
+        for(let k in right.properties){
+          let property = right.properties[k];
+          result[property.key.name] = {
+            type: typeof property.value.value,
+            value: property.value.value,
+          };
+        }
+        return {
+          type: 'object',
+          value:result
+        };
         break;
     }
   }
 
   //从当前scope的定义里获取定义的返回结构
   getDefStruct(name) {
-    let struct;
-    if (!this.def['@' + name]) {
-      struct = {};
-    }else {
+    let struct = this.def['@' + name] || (this.parent ? this.parent.getDefStruct(name) : null);
 
-      switch (this.def['@' + name].type) {
-        case 'func':
-          struct = this.def['@' + name].scope.ret;
-          break;
-        case 'module':
-          struct = this.def['@' + name].scope.ret;
-          break;
-        case 'class':
-          struct = this.def['@' + name].scope.ret;
-          break;
-        case 'object':
-          struct = this.def['@' + name];
-          break;
-        default:
-          struct = this.def['@' + name];
-          break
-      }
-    }
-    if (typeof struct === 'string' && this.def['@' + struct]) {
-      return this.getDefStruct(struct);
-    }
     return struct;
   }
 
@@ -447,24 +489,37 @@ class Scope {
 
   //处理调用语句的返回结构
   getReturnStruct(callExpression, name) {
+
     switch (callExpression.callee.type) {
       case 'Identifier':
         if (callExpression.callee.name === 'require') {
-          //todo
+          
           let file = this.resolvedFile(callExpression.arguments[0].value);
           //当resolved结果跟原来一样,表示是一个核心模块,可以忽略
           if (file === callExpression.arguments[0].value) {
             return null;
           }
           let scope = new Scope(name, file, this);
-          this.def['@' + name] = {
-            type: 'module',
-            scope: scope.ret,
-          };
+
+          if(scope.ret[0].type==='class'){
+            this.def['@'+scope.ret[0].scope.name] = {
+              type: 'module',
+              scope: scope.ret[0],
+            };
+            this.def['@' + name] = {
+              type: 'module',
+              scope: scope.ret[0],
+            };
+          }else {
+            this.def['@' + name] = {
+              type: 'module',
+              scope: scope.ret[0],
+            };
+          }
+          
           return name;
 
         } else if (callExpression.callee.name && this.def['@' + callExpression.callee.name]) {
-          //本地定义的调用 TODO
           let args = {};
           for (let k in this.def['@' + callExpression.callee.name].args) {
             if (callExpression.arguments[k].type === 'Identifier' && this.def['@' + callExpression.arguments[k].name]) {
@@ -482,6 +537,7 @@ class Scope {
       case 'MemberExpression':
         let id;
         let [object, property] = [callExpression.callee.object.type === 'ThisExpression' ? 'this' : callExpression.callee.object.name, callExpression.callee.property.name];
+        
         if (object === 'this') {
           id = property;
         } else {
@@ -489,8 +545,9 @@ class Scope {
         }
 
         if (this.parent.def['@' + object] && this.parent.def['@' + object].type === 'module') {
-          this.def['@' + id] = this.parent.def['@' + object].scope.def['@' + property].scope.ret || {};
+          this.def['@' + id] = this.parent.getDefStruct(this.parent.def['@' + object].scope.scope.def['@' + property].scope.ret[0]) || {};
         }
+
         return this.def['@' + id];
         break;
     }
@@ -515,7 +572,6 @@ class Scope {
     }
 
     result['scope'] = new Scope(name, def.body.body, this);
-
     result['scope'].dir = this.dir;
     result['scope'].file = this.file;
     result['scope'].insertArgs(result['args']);

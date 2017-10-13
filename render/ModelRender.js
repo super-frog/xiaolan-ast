@@ -11,7 +11,6 @@ const py = require('frog-lib').pinyin;
 class ModelRender extends BaseRender {
   constructor(definition, output) {
     super(definition);
-
     this.definition = definition;
     this.ouputPath = output;
     this.data._name_ = py.camel(definition.name, true);
@@ -29,7 +28,8 @@ class ModelRender extends BaseRender {
     this.data._method_.push(this.create());
 
     this.data._depends_ = new Set();
-    this.data._depends_.add(`const Connection = require('xiaolan-db').Connection;`);
+    this.data._depends_.add(`const Connection = require('xiaolan-db').Connection('default').conn;`);
+    this.data._depends_.add(`const TableName = "${this.definition.name}";`);
     this.data._depends_ = Array.from(this.data._depends_);
     let tpl = templateBank('ModelClass').split(EOL);
     for (let k in tpl) {
@@ -51,20 +51,18 @@ class ModelRender extends BaseRender {
 
       output.push(`this.${k} = (data.${k}||data.${fieldSet[k].fieldName})||'';`);
     }
-    output.push(`this.conn = Connection('default').conn;`);
-    output.push(`this.tableName = "${this.definition.name}";`);
+
     return output;
   }
 
   searchFunc() {
     let output = [];
     if (this.definition.primary.key) {
-      let func = `//@row${EOL}`;
-      func += `  static fetchBy${py.camel(this.definition.primary.key, true)}(v){${EOL}`;
-      func += `    let conn = Connection('default').conn;${EOL}`;
+      let func = `static fetchBy${py.camel(this.definition.primary.key, true)}(v){${EOL}`;
       func += `    let sql = 'select * from ${this.definition.name} where ${this.definition.primary.fieldName}=:v limit 1';${EOL}`;
+      func += `    //@row${EOL}`;
       func += `    return new Promise((resolved, rejected) => {
-      conn.query({sql:sql, params:{v:v}}, (e ,r)=>{
+      Connection.query({sql:sql, params:{v:v}}, (e ,r)=>{
         if(e){
           rejected(e);
         }else{
@@ -77,8 +75,7 @@ class ModelRender extends BaseRender {
     }
     if (Object.keys(this.definition.index).length) {
       for (let k in this.definition.index) {
-        let func = `//@list${EOL}`;
-        func += `  static fetchBy`;
+        let func = `static fetchBy`;
         let args = [];
         let where = [];
         let params = [];
@@ -91,10 +88,10 @@ class ModelRender extends BaseRender {
         args.push(`page=1`);
         args.push(`pageSize=10`);
         func += `(${args.join(', ')}){${EOL}`;
-        func += `    let conn = Connection('default').conn;${EOL}`;
         func += `    let sql = 'select * from ${this.definition.name} where ${where.join(' and ')} order by ${this.definition.primary.fieldName} desc limit \'+((page-1)*pageSize)+\',\'+pageSize+\'';${EOL}`;
+        func += `    //@list${EOL}`;
         func += `    return new Promise((resolved, rejected) => {
-      conn.query({sql:sql, params:{${params.join(', ')}}}, (e ,r)=>{
+      Connection.query({sql:sql, params:{${params.join(', ')}}}, (e ,r)=>{
         if(e){
           rejected(e);
         }else{
@@ -112,8 +109,7 @@ class ModelRender extends BaseRender {
     }
     if (Object.keys(this.definition.uniq).length) {
       for (let k in this.definition.uniq) {
-        let func = `//@row${EOL}`;
-        func += `  static fetchBy`;
+        let func = `static fetchBy`;
         let args = [];
         let where = [];
         let params = [];
@@ -126,10 +122,10 @@ class ModelRender extends BaseRender {
         args.push(`page=1`);
         args.push(`pageSize=10`);
         func += `(${args.join(', ')}){${EOL}`;
-        func += `    let conn = Connection('default').conn;${EOL}`;
         func += `    let sql = 'select * from ${this.definition.name} where ${where.join(' and ')} order by ${this.definition.primary.fieldName} desc limit \'+((page-1)*pageSize)+\',\'+pageSize+\'';${EOL}`;
+        func += `    //@row${EOL}`;
         func += `    return new Promise((resolved, rejected) => {
-      conn.query({sql:sql, params:{${params.join(', ')}}}, (e ,r)=>{
+      Connection.query({sql:sql, params:{${params.join(', ')}}}, (e ,r)=>{
         if(e){
           rejected(e);
         }else{
@@ -214,9 +210,9 @@ class ModelRender extends BaseRender {
     output += `    if(force){${EOL}`;
     output += `      this.validate();${EOL}`;
     output += `    }${EOL}`;
-    output += `    let conn = this.conn;${EOL}`;
+    output += `    //@true${EOL}`;
     output += `    return new Promise((resolved, rejected) => {${EOL}`;
-    output += '      let sql = `insert into ${this.tableName} set ';
+    output += '      let sql = `insert into ${TableName} set ';
     let fieldSet = this.definition.fieldSet;
     for (let k in fieldSet) {
       if (fieldSet[k].autoIncrease === true) {
@@ -226,11 +222,11 @@ class ModelRender extends BaseRender {
     }
     output = output.substr(0, output.length - 1);
     output += '`;' + EOL;
-    output += `      conn.query({sql: sql,params:this.data()},(e, r) => {${EOL}`;
+    output += `      Connection.query({sql: sql,params:this.data()},(e, r) => {${EOL}`;
     output += `        if(e) {${EOL}`;
     output += `          rejected(e);${EOL}`;
     output += `        }else{${EOL}`;
-    output += `          resolved(r);${EOL}`;
+    output += `          resolved(true);${EOL}`;
     output += `        }${EOL}`;
     output += `      });${EOL}`;
     output += `    });${EOL}`;
@@ -243,9 +239,9 @@ class ModelRender extends BaseRender {
     output += `    if(force){${EOL}`;
     output += `      this.validate();${EOL}`;
     output += `    }${EOL}`;
-    output += `    let conn = this.conn;${EOL}`;
+    output += `    //@true${EOL}`;
     output += `    return new Promise((resolved, rejected) => {${EOL}`;
-    output += '      let sql = `update ${this.tableName} set ';
+    output += '      let sql = `update ${TableName} set ';
     let fieldSet = this.definition.fieldSet;
     let values = [];
     for (let k in fieldSet) {
@@ -259,11 +255,11 @@ class ModelRender extends BaseRender {
     output += ' where ' + primary + '=\'${this.' + this.definition.primary.key + '}\'`;' + EOL;
     output += `      let data = this.data();${EOL}`;
     output += `      delete data.${this.definition.primary.key};${EOL}`;
-    output += `      conn.query({sql: sql,params:data},(e, r) => {${EOL}`;
+    output += `      Connection.query({sql: sql,params:data},(e, r) => {${EOL}`;
     output += `        if(e) {${EOL}`;
     output += `          rejected(e);${EOL}`;
     output += `        }else{${EOL}`;
-    output += `          resolved(r);${EOL}`;
+    output += `          resolved(true);${EOL}`;
     output += `        }${EOL}`;
     output += `      });${EOL}`;
     output += `    });${EOL}`;
