@@ -20,8 +20,8 @@ class JsocDriver {
     this.apis = {};
     this.loadErrorDefinitions();
     this.scan();
-    fs.writeFileSync(process.cwd()+'/jsoc.json', JSON.stringify(this, null, 2));
-    console.log('File generated in : '+process.cwd()+'/jsoc.json');
+    fs.writeFileSync(process.cwd() + '/jsoc.json', JSON.stringify(this, null, 2));
+    console.log('File generated in : ' + process.cwd() + '/jsoc.json');
   }
 
   scan() {
@@ -35,7 +35,7 @@ class JsocDriver {
     for (let k in routes) {
       let scope;
       let returns = [];
-      
+
       for (let i in routes[k].handlers) {
         let handler = `${this.projectRoot}/handlers/${routes[k].handlers[i]}.js`;
         scope = new Scope(routes[k].handlers[i], handler);
@@ -57,7 +57,7 @@ class JsocDriver {
           };
           jsocResponse.success.push(this.jsocResponse(returns[k]));
         } else {
-          jsocResponse.failed.push(this.jsocResponse(returns[k]));
+          jsocResponse.failed.push(returns[k]);
         }
       }
 
@@ -74,11 +74,11 @@ class JsocDriver {
 
   }
 
-  fattenReturn(ret){
-    
+  fattenReturn(ret) {
+
     let result = [];
-    
-    for(let k in ret) {
+
+    for (let k in ret) {
 
       switch (ret[k].type) {
         case 'func':
@@ -93,7 +93,7 @@ class JsocDriver {
     return result;
   }
 
-  jsocRequest(scope,route){
+  jsocRequest(scope, route) {
     let astObjects = scope.astObjects();
     let result = {};
     result.method = route.method;
@@ -102,32 +102,48 @@ class JsocDriver {
     result.params = {};
     result.body = {};
     let requestObj = null;
-    for(let k in scope.def){
-      if(scope.def[k].exports === true){
+    for (let k in scope.def) {
+      if (scope.def[k].exports === true) {
         requestObj = scope.def[k].args;
         break;
       }
     }
-    for(let k in requestObj){
+
+    for (let k in requestObj) {
       let objectDefinition = astObjects[requestObj[k]] || null;
-      if(objectDefinition === null){
+      if (objectDefinition === null) {
         continue;
       }
+      for (let i in objectDefinition.props) {
+        let ins = objectDefinition.props[i].definition.in.split('.');
 
-      for(let i in objectDefinition.props){
-        result[objectDefinition.props[i].definition.in][i] = {
-          _type: objectDefinition.props[i].definition.type.name,
-          _default:objectDefinition.props[i].definition.defaultValue,
-          _desc: [objectDefinition.props[i].definition.comment,objectDefinition.props[i].definition.description].join(' ')
-        };
-        if(objectDefinition.props[i].definition.type.length){
-          result[objectDefinition.props[i].definition.in][i]._length = objectDefinition.props[i].definition.type.length;
+        let _node = result;
+        while (ins.length > 0) {
+          let _k = ins.shift();
+          _node[_k] = _node[_k] || {};
+          _node = _node[_k];
         }
-        if(objectDefinition.props[i].definition.type.range){
-          result[objectDefinition.props[i].definition.in][i]._range = objectDefinition.props[i].definition.type.range;
+        if(objectDefinition.props[i].definition.key){
+          _node[objectDefinition.props[i].definition.key] = _node[objectDefinition.props[i].definition.key] || {};
+          _node = _node[objectDefinition.props[i].definition.key];
+        }else{
+          _node[i] = _node[i] || {};
+          _node = _node[i];
+        }
+
+        _node._type = objectDefinition.props[i].definition.type.name;
+        _node._default = objectDefinition.props[i].definition.defaultValue;
+        _node._desc = [objectDefinition.props[i].definition.comment, objectDefinition.props[i].definition.description].join(' ');
+
+        if (objectDefinition.props[i].definition.type.length) {
+          _node._length = objectDefinition.props[i].definition.type.length;
+        }
+        if (objectDefinition.props[i].definition.type.range) {
+          _node._range = objectDefinition.props[i].definition.type.range;
         }
       }
     }
+
     return result;
   }
 
@@ -178,16 +194,35 @@ class JsocDriver {
     for (let k in errorDefinitions) {
       this.definitions['error.' + errorDefinitions[k].name] = (new XiaolanError(errorDefinitions[k])).obj();
     }
+    this.definitions['error.INTERNAL_ERROR'] = (new XiaolanError({
+      code: -1,
+      httpStatus: 500,
+      message: 'Internal Error',
+      name: 'INTERNAL_ERROR',
+    })).obj();
+    this.definitions['error.BAD_REQUEST'] = (new XiaolanError({
+      name: 'BAD_REQUEST',
+      httpStatus: 400,
+      code: -2,
+      message: '入参检测错误',
+    })).obj();
+    this.definitions['error.NOT_FOUND'] = (new XiaolanError({
+      name: 'NOT_FOUND',
+      httpStatus: 404,
+      code: -3,
+      message: 'not found',
+    })).obj();
   }
 
   formatReturn(ret) {
     let result = {};
     switch (ret.type) {
       case 'func':
-        
+
         break;
       case 'unknown':
         result = this.definitions[ret.value];
+        result.message += ret.msg;
         break;
       case 'object':
         for (let k in ret.value) {
@@ -196,6 +231,9 @@ class JsocDriver {
         break;
       case 'array':
         result = [this.formatReturn(ret.value)];
+        break;
+      case 'Literal':
+        result = ret.value;
         break;
     }
     return result;

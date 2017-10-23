@@ -44,9 +44,9 @@ destroy@~1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/destroy/-/destroy-1.0.4.tgz#978857442c44749e4206613e37946205826abd80"
 
-dotenvr@^0.1.7:
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/dotenvr/-/dotenvr-0.1.7.tgz#68333d33f093e2d6fbf2ae76985f9738a7592a01"
+dotenvr@^0.1.9:
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/dotenvr/-/dotenvr-0.1.9.tgz#d454b6ea22e208144f483e4b11e66da2eaa3de96"
 
 double-ended-queue@^2.1.0-0:
   version "2.1.0-0"
@@ -271,15 +271,9 @@ util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
 
-xiaolan-db@^1.2.6:
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/xiaolan-db/-/xiaolan-db-1.2.7.tgz#9c179ee7e38b31c7daf5016893221037cf42e8a4"
-  dependencies:
-    fy-mysql "^0.2.13"
-
-xiaolan-db@^1.2.8:
-  version "1.2.8"
-  resolved "https://registry.yarnpkg.com/xiaolan-db/-/xiaolan-db-1.2.8.tgz#e4e0ed9a09c7601c40dc4e61648445e45c3eb1bd"
+xiaolan-db@^1.2.9:
+  version "1.2.9"
+  resolved "https://registry.yarnpkg.com/xiaolan-db/-/xiaolan-db-1.2.9.tgz#97d4f17476902dfd7cf35d92c95e51eebf3ca9b9"
   dependencies:
     fy-mysql "^0.2.13"
 
@@ -287,17 +281,17 @@ xiaolan-router@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/xiaolan-router/-/xiaolan-router-1.0.1.tgz#e81c4493aa15af0637177480cf91735df9948089"
 
-xiaolan@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/xiaolan/-/xiaolan-1.5.0.tgz#4386ed00ccdae5a613974a3e593c7008ff5c0682"
+xiaolan@^1.5.17:
+  version "1.5.17"
+  resolved "https://registry.yarnpkg.com/xiaolan/-/xiaolan-1.5.17.tgz#e23fcac46df4b231169a9cb8b86d154822956a0d"
   dependencies:
     async "^2.5.0"
     colors "^1.1.2"
     crypto "0.0.3"
-    dotenvr "^0.1.7"
+    dotenvr "^0.1.9"
     easymysql "^0.2.7"
     fy-mysql "^0.2.13"
     redis "^2.2.5"
     serve-static "^1.9.3"
-    xiaolan-db "^1.2.6"
+    xiaolan-db "^1.2.9"
     xiaolan-router "^1.0.1"

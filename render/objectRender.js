@@ -31,6 +31,8 @@ class ObjectRender extends BaseRender {
 
     this.data._method_.push(this.validateFunc());
 
+    this.data._method_.push(this.pickFunc());
+
     this.data._depends_ = Array.from(this.data._depends_);
 
     let tpl = templateBank('ObjectClass').split(EOL);
@@ -46,6 +48,31 @@ class ObjectRender extends BaseRender {
     }
   }
 
+  pickFunc() {
+    return `static pick(source, path, type=null, defaultValue=null){
+    let paths = path.split('.');
+    let tmp = source;
+    for(let k in paths){
+      if(tmp[paths[k]]){
+        tmp = tmp[paths[k]];
+      }else{
+        tmp = tmp[paths[k]];
+        break;
+      }
+    }
+    
+    switch (type){
+      case 'string':
+      case 'enum':
+        tmp = tmp.toString();
+        break;
+      case 'number':
+        tmp = 1*tmp;
+        break;
+    }
+    return (defaultValue && (undefined===tmp)) ? defaultValue: tmp;
+  }`;
+  }
 
   classConstructorBody() {
     let props = this.definition.props;
@@ -58,7 +85,7 @@ class ObjectRender extends BaseRender {
         r.toFile();
         continue;
       }
-      output.push(`this.${props[k].name} = options.${props[k].name} || ${this.getDefaultValue(props[k].definition)};`);
+      output.push(`this.${props[k].name} = options.${props[k].name}${props[k].definition.requirement===true?``:` || ${this.getDefaultValue(props[k].definition)}`};`);
     }
     return output;
   }
@@ -135,6 +162,7 @@ class ObjectRender extends BaseRender {
 
   fromRequestFunc() {
     let definition = this.definition;
+
     let className = definition.name;
     let props = definition.props;
     let output = `static fromRequest(req){${EOL}`;
@@ -144,11 +172,12 @@ class ObjectRender extends BaseRender {
         continue;
       }
       if(props[k].definition.requirement === true){
-        output += `    if(!(req.${props[k].definition.in} && req.${props[k].definition.in}.${props[k].name})){
-      throw new Error("Requirement : [${props[k].name}]");
+        output += `    if(!this.pick(req, '${props[k].definition.in}.${props[k].definition.key || props[k].name}')){
+      throw new Error("Requirement : [${props[k].definition.key || props[k].name}]");
     }${EOL}`;
       }
-      output += `    options.${props[k].name} = (req.${props[k].definition.in} && req.${props[k].definition.in}.${props[k].name}) ? (${this.formatter(props[k].definition.type.name)}req.${props[k].definition.in}.${props[k].name}) : ${this.getDefaultValue(props[k].definition)};${EOL}`;
+      output += `    options.${props[k].name} = this.pick(req, '${props[k].definition.in}.${props[k].definition.key || props[k].name}', '${props[k].definition.type.name}', ${this.getDefaultValue(props[k].definition)});${EOL}`;
+
     }
     output += `    return new ${className}(options);${EOL}`;
     output += `  }${EOL}`;

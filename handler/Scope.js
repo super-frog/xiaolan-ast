@@ -41,7 +41,7 @@ class Scope {
       writable: true,
     });
     this.parent = parent;
-    if(parent){
+    if (parent) {
       this.def = Object.assign(this.def, this.parent.def);
     }
     Object.defineProperty(this, 'ast', {
@@ -52,7 +52,9 @@ class Scope {
     });
     this.AI = 1;
     this.ast = ast;
-    //console.log(JSON.stringify(ast));process.exit(0);//todo
+// if(this.name === 'Arrow1'){
+//   console.log(JSON.stringify(ast));process.exit(0);//todo
+// }
     this.run(ast);
   }
 
@@ -70,7 +72,6 @@ class Scope {
           this.expressionStatement(ast[k]);
           break;
         case 'ReturnStatement':
-          //console.log(JSON.stringify(ast[k]));
           this.ret = this.ret.concat(this.returnStatement(ast[k]));
           break;
         case 'ClassDeclaration':
@@ -98,6 +99,7 @@ class Scope {
           this.forStatement(ast[k]);
           break;
       }
+
     }
   }
 
@@ -178,10 +180,9 @@ class Scope {
             declare = declarations[k].id.name;
             break;
           case 'CallExpression':
-
             declare = this.getReturnStruct(declarations[k].init, declarations[k].id.name);
 
-            if(typeof declare!=='string') {
+            if (typeof declare !== 'string') {
               this.def['@' + declarations[k].id.name] = declare;
             }
             break;
@@ -217,21 +218,24 @@ class Scope {
 
   //专门处理返回语句
   returnStatement(stat) {
-    if(stat.leadingComments && stat.leadingComments[0] && ['@row', '@list', '@true'].includes(stat.leadingComments[0].value)){
-      if(stat.leadingComments[0].value === '@row'){
+    if (stat.leadingComments && stat.leadingComments[0] && ['@row', '@list', '@true', '@this'].includes(stat.leadingComments[0].value)) {
+      if (stat.leadingComments[0].value === '@row') {
         return this.getClassRet(this.parent);
-      }else if (stat.leadingComments[0].value === '@list'){
+      } else if (stat.leadingComments[0].value === '@list') {
         return {
           type: 'array',
           value: this.getClassRet(this.parent),
         };
-      }else if (stat.leadingComments[0].value === '@true'){
+      } else if (stat.leadingComments[0].value === '@true') {
         return {
           type: 'Literal',
           value: true
         };
+      } else if (stat.leadingComments[0].value === '@this') {
+        return this.parent.parent.name;
       }
     }
+
     switch (stat.argument.type) {
       case 'ArrayExpression':
         return {
@@ -243,7 +247,7 @@ class Scope {
         return this.getIdentifierDef(stat.argument.callee.name);
         break;
       case 'Identifier':
-        let def = this.def['@' + this.getIdentifierDef(stat.argument.name)];
+
         return this.getDefStruct(this.getIdentifierDef(stat.argument.name));
 
       case 'Literal':
@@ -271,7 +275,11 @@ class Scope {
         return this.def['@' + id];
         break;
       case 'CallExpression':
-        return this.getCalleeStruct(stat.argument.callee);
+        return this.getCalleeStruct(stat.argument.callee, stat.argument.arguments);
+        break;
+      case 'AssignmentExpression':
+        let right = stat.argument.right;
+        return this.returnStatement(right);
         break;
       default:
         return {
@@ -336,7 +344,8 @@ class Scope {
           }
         } else {
 
-          this.def['@' + expression.expression.left.name] = this.getRightStruct(expression.expression.right);
+          this.def['@' + this.memberExpressionLeftName(expression.expression.left)] = this.getRightStruct(expression.expression.right);
+
           this.var[expression.expression.left.name] = expression.expression.left.name;
         }
 
@@ -344,23 +353,53 @@ class Scope {
     }
   }
 
-  getCalleeStruct(callee) {
+  memberExpressionLeftName(left) {
+    switch (left.type) {
+      case 'Identifier':
+        return left.name;
+        break;
+      case 'MemberExpression':
+        return this.memberExpressionLeftName(left.object) + '.' + left.property.name;
+        break;
+      case 'CallExpression':
+        return this.memberExpressionLeftName(left.callee);
+        break;
+    }
+  }
+
+  getCalleeStruct(callee, args = {}) {
+
     switch (callee.type) {
       case 'MemberExpression':
-
-        let object = this.getDefStruct(callee.object.name);
+        let object = this.getDefStruct(this.memberExpressionLeftName(callee.object));
+        if (!object) {
+          if (this.memberExpressionLeftName(callee.object).startsWith('error')) {
+            if (callee.property.name === 'withMessage') {
+              return {
+                type: 'unknown',
+                value: this.memberExpressionLeftName(callee.object),
+                msg: args[0] ? args[0].value : '',
+              };
+            }
+          }
+          //todo 暂时忽视这个问题
+          return {
+            type: 'unknown'
+          };
+        }
 
         let innerScope = object.scope.scope;
         let method = innerScope.def['@' + callee.property.name];
         return method.scope.ret[0];
         break;
+
       default:
         if (this.def['@' + right.callee.name]) {
           return this.getDefStruct(right.callee.name);
         }
         return {
           type: 'Identify',
-          value:right.callee.name
+          value: right.callee.name
         };
         break;
     }
@@ -385,7 +424,7 @@ class Scope {
       case 'Literal':
         result = {
           type: 'Literal',
-          value:{
+          value: {
             type: typeof right.value,
             value: right.value,
           },
@@ -393,7 +432,7 @@ class Scope {
         return result;
         break;
       case 'CallExpression':
-        return this.getCalleeStruct(right.callee);
+        return this.getCalleeStruct(right.callee, right.arguments);
         break;
       case 'ArrayExpression':
         return {
@@ -409,7 +448,7 @@ class Scope {
         return this.getDefStruct(this.getIdentifierDef(right.name));
         break;
       case 'ObjectExpression':
-        for(let k in right.properties){
+        for (let k in right.properties) {
           let property = right.properties[k];
           result[property.key.name] = {
             type: typeof property.value.value,
@@ -418,7 +457,7 @@ class Scope {
         }
         return {
           type: 'object',
-          value:result
+          value: result
         };
         break;
     }
@@ -426,6 +465,9 @@ class Scope {
 
   //从当前scope的定义里获取定义的返回结构
   getDefStruct(name) {
+    if (typeof name !== 'string') {
+      return name;
+    }
     let struct = this.def['@' + name] || (this.parent ? this.parent.getDefStruct(name) : null);
 
     return struct;
@@ -462,7 +504,6 @@ class Scope {
 
 
   getIdentifierDef(name) {
-
     while (this.var[name] && (this.var[name] != name)) {
       name = this.var[name];
     }
@@ -489,11 +530,10 @@ class Scope {
 
   //处理调用语句的返回结构
   getReturnStruct(callExpression, name) {
-
     switch (callExpression.callee.type) {
       case 'Identifier':
         if (callExpression.callee.name === 'require') {
-          
+
           let file = this.resolvedFile(callExpression.arguments[0].value);
           //当resolved结果跟原来一样,表示是一个核心模块,可以忽略
           if (file === callExpression.arguments[0].value) {
@@ -501,8 +541,8 @@ class Scope {
           }
           let scope = new Scope(name, file, this);
 
-          if(scope.ret[0].type==='class'){
-            this.def['@'+scope.ret[0].scope.name] = {
+          if (scope.ret[0].type === 'class') {
+            this.def['@' + scope.ret[0].scope.name] = {
               type: 'module',
               scope: scope.ret[0],
             };
@@ -510,13 +550,13 @@ class Scope {
               type: 'module',
               scope: scope.ret[0],
             };
-          }else {
+          } else {
             this.def['@' + name] = {
               type: 'module',
               scope: scope.ret[0],
             };
           }
-          
+
           return name;
 
         } else if (callExpression.callee.name && this.def['@' + callExpression.callee.name]) {
@@ -537,7 +577,7 @@ class Scope {
       case 'MemberExpression':
         let id;
         let [object, property] = [callExpression.callee.object.type === 'ThisExpression' ? 'this' : callExpression.callee.object.name, callExpression.callee.property.name];
-        
+
         if (object === 'this') {
           id = property;
         } else {
@@ -547,7 +587,6 @@ class Scope {
         if (this.parent.def['@' + object] && this.parent.def['@' + object].type === 'module') {
           this.def['@' + id] = this.parent.getDefStruct(this.parent.def['@' + object].scope.scope.def['@' + property].scope.ret[0]) || {};
         }
-
         return this.def['@' + id];
         break;
     }
@@ -570,8 +609,8 @@ class Scope {
     for (let k in def.params) {
       result['args'].push(def.params[k].name || def.params[k].left.name);
     }
-
     result['scope'] = new Scope(name, def.body.body, this);
+
     result['scope'].dir = this.dir;
     result['scope'].file = this.file;
     result['scope'].insertArgs(result['args']);

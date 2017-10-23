@@ -49,10 +49,29 @@ class ModelRender extends BaseRender {
     let output = [];
     for (let k in fieldSet) {
 
-      output.push(`this.${k} = (data.${k}||data.${fieldSet[k].fieldName})||'';`);
+      output.push(`this.${k} = (data.${k}||data.${fieldSet[k].fieldName})||${this.getDefaultValue(fieldSet[k])};`);
     }
 
     return output;
+  }
+
+  getDefaultValue(fieldDefinition){
+    let type = fieldDefinition.rules[0];
+    switch (type) {
+      case 'string':
+        return `'${fieldDefinition.defaultValue || ''}'`;
+        break;
+      case 'enum':
+      case 'number':
+        return `${fieldDefinition.defaultValue || 0}`;
+        break;
+      case 'array':
+        return `['${fieldDefinition.defaultValue.join('\',\'')}']`;
+        break;
+      case 'ref':
+        return `new ${fieldDefinition.type.ref.name}({})`;
+        break;
+    }
   }
 
   searchFunc() {
@@ -66,7 +85,11 @@ class ModelRender extends BaseRender {
         if(e){
           rejected(e);
         }else{
-          resolved(new ${this.data._name_}(r[0]));
+          if(r[0]){
+            resolved(new ${this.data._name_}(r[0]));
+          }else{
+            resolved(null);
+          }
         }
       });
     });${EOL}`;
@@ -129,7 +152,11 @@ class ModelRender extends BaseRender {
         if(e){
           rejected(e);
         }else{
-          resolved(new ${this.data._name_}(r[0]));
+          if(r[0]){
+            resolved(new ${this.data._name_}(r[0]));
+          }else{
+            resolved(null);
+          }
         }
       });
     });${EOL}`;
@@ -189,12 +216,12 @@ class ModelRender extends BaseRender {
       if (fieldSet[k].rules.length > 0 && !fieldSet[k].autoIncrease) {
         switch (fieldSet[k].rules[0]) {
           case 'number':
-            output += `    if(!(typeof this.${k}==='number' && this.${k}>=${fieldSet[k].rules[1]} && this.${k}<=${fieldSet[k].rules[2]})){${EOL}`;
+            output += `    if(this.${k} !== null && !(typeof this.${k}==='number' && this.${k}>=${fieldSet[k].rules[1]} && this.${k}<=${fieldSet[k].rules[2]})){${EOL}`;
             output += `      throw new Error('attribute ${k}(${fieldSet[k].fieldName}) must be a number in [${fieldSet[k].rules[1]},${fieldSet[k].rules[2]}]');${EOL}`;
             output += `    }${EOL}`;
             break;
           case 'string':
-            output += `    if(!(typeof this.${k}==='string' && this.${k}.length>=${fieldSet[k].rules[1]} && this.${k}.length<=${fieldSet[k].rules[2]})){${EOL}`;
+            output += `    if(this.${k} !== null && !(typeof this.${k}==='string' && this.${k}.length>=${fieldSet[k].rules[1]} && this.${k}.length<=${fieldSet[k].rules[2]})){${EOL}`;
             output += `      throw new Error('attribute ${k}(${fieldSet[k].fieldName}) must be a string length in [${fieldSet[k].rules[1]},${fieldSet[k].rules[2]}]');${EOL}`;
             output += `    }${EOL}`;
             break;
@@ -206,22 +233,30 @@ class ModelRender extends BaseRender {
   }
 
   save() {
+
     let output = `save(force=false){${EOL}`;
     output += `    if(force){${EOL}`;
-    output += `      this.validate();${EOL}`;
+    output += `      try{${EOL}`;
+    output += `        this.validate();${EOL}`;
+    output += `      }catch(e){${EOL}`;
+    output += `        return Promise.resolve(Object.assign(error.BAD_REQUEST, {message: error.BAD_REQUEST.message+':'+e.message}));${EOL}`;
+    output += `      }${EOL}`;
     output += `    }${EOL}`;
     output += `    //@true${EOL}`;
     output += `    return new Promise((resolved, rejected) => {${EOL}`;
-    output += '      let sql = `insert into ${TableName} set ';
-    let fieldSet = this.definition.fieldSet;
-    for (let k in fieldSet) {
-      if (fieldSet[k].autoIncrease === true) {
-        continue;
-      }
-      output += `${fieldSet[k].fieldName}=:${k},`;
+    output += `      let data = this.data();${EOL}`;
+    output += '      let sql = `insert into ${TableName} set `;'+EOL;
+    output += `      let fields = [];${EOL}`;
+    output += `      for(let k in data){${EOL}`;
+    if(this.definition.primary) {
+      output += `        if(k==='${this.definition.primary.key}' || data[k]===null){${EOL}`;
+      output += `          continue;${EOL}`;
+      output += `        }${EOL}`;
     }
-    output = output.substr(0, output.length - 1);
-    output += '`;' + EOL;
+    output += '        fields.push(`${KeyMap[k]}=:${k}`);'+EOL;
+    output += `      }${EOL}`;
+    output += `      sql += fields.join(',');${EOL}`;
+
     output += `      Connection.query({sql: sql,params:this.data()},(e, r) => {${EOL}`;
     output += `        if(e) {${EOL}`;
     output += `          rejected(e);${EOL}`;
@@ -241,20 +276,23 @@ class ModelRender extends BaseRender {
     output += `    }${EOL}`;
     output += `    //@true${EOL}`;
     output += `    return new Promise((resolved, rejected) => {${EOL}`;
-    output += '      let sql = `update ${TableName} set ';
-    let fieldSet = this.definition.fieldSet;
-    let values = [];
-    for (let k in fieldSet) {
-      if (fieldSet[k].autoIncrease === true) {
-        continue;
-      }
-      values.push(`${fieldSet[k].fieldName}=:${k}`)
-    }
-    output += values.join(',');
-    let primary = this.definition.primary.fieldName;
-    output += ' where ' + primary + '=\'${this.' + this.definition.primary.key + '}\'`;' + EOL;
+    output += '      let sql = `update ${TableName} set `;'+EOL;
     output += `      let data = this.data();${EOL}`;
-    output += `      delete data.${this.definition.primary.key};${EOL}`;
+    output += `      let fields = [];${EOL}`;
+    output += `      for(let k in data){${EOL}`;
+    if(this.definition.primary) {
+      output += `        if(k==='${this.definition.primary.key}' || data[k]===null){${EOL}`;
+      output += `          continue;${EOL}`;
+      output += `        }${EOL}`;
+    }
+    output += '        fields.push(`${KeyMap[k]}=:${k}`);'+EOL;
+    output += `      }${EOL}`;
+    output += `      sql += fields.join(',');${EOL}`;
+
+
+
+    let primary = this.definition.primary.fieldName;
+    output += '      sql += ` where ' + primary + '=:' + this.definition.primary.key + '`;' + EOL;
     output += `      Connection.query({sql: sql,params:data},(e, r) => {${EOL}`;
     output += `        if(e) {${EOL}`;
     output += `          rejected(e);${EOL}`;
@@ -269,6 +307,7 @@ class ModelRender extends BaseRender {
 
   create() {
     let output = `static create(data){${EOL}`;
+    output += `    //@this${EOL}`;
     output += `    return new ${this.data._name_}(data);${EOL}`;
     output += `  }${EOL}`;
     return output;

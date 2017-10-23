@@ -1,6 +1,6 @@
 
 const User = {
-  //用户名 string required in:body
+  //用户名 string required in:body json:username
   //用於在前台頁面展示
   name:'doge',
   //年龄 number:0,99 in:body require

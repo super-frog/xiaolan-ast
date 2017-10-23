@@ -39,13 +39,11 @@ class BaseRender {
   }
 
   toFile() {
-    if (fs.existsSync(path.resolve(this.ouputPath))) {
-      fs.writeFileSync(`${path.resolve(this.ouputPath)}/${this.data._name_}.gen.js`, this.output.join(EOL));
-      console.log('File generated in : ' + `${path.resolve(this.ouputPath)}/${this.data._name_}.gen.js`);
-    } else {
-      fs.writeFileSync(this.fileName(), this.output.join(EOL));
-      console.log('File generated in : ' + this.fileName());
+    if (!fs.existsSync(path.resolve(this.ouputPath))) {
+      fs.mkdirSync(path.resolve(this.ouputPath));
     }
+    fs.writeFileSync(`${path.resolve(this.ouputPath)}/${this.data._name_}.gen.js`, this.output.join(EOL));
+    console.log('File generated in : ' + `${path.resolve(this.ouputPath)}/${this.data._name_}.gen.js`);
   }
 }
 
