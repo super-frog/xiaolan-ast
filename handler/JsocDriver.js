@@ -186,11 +186,11 @@ class JsocDriver {
   }
 
   loadErrorDefinitions() {
-    if (!fs.existsSync(`${this.projectRoot}/errors/Error.gen.js`)) {
-      console.log(`can not found errors/Error.gen.js${EOL}`.red);
+    if (!fs.existsSync(`${this.projectRoot}/definitions/errors/Error.gen.js`)) {
+      console.log(`can not found definitions/errors/Error.gen.js${EOL}`.red);
       process.exit(-1);
     }
-    let errorDefinitions = require(`${this.projectRoot}/errors/Error.gen.js`);
+    let errorDefinitions = require(`${this.projectRoot}/definitions/errors/Error.gen.js`);
     for (let k in errorDefinitions) {
       this.definitions['error.' + errorDefinitions[k].name] = (new XiaolanError(errorDefinitions[k])).obj();
     }
