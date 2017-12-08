@@ -60,7 +60,9 @@ class ObjectRender extends BaseRender {
         break;
       }
     }
-    
+    if(tmp===undefined){
+      return defaultValue;
+    }
     switch (type){
       case 'string':
       case 'enum':

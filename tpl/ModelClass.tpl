@@ -2,7 +2,7 @@
 _depends_
 
 class _name_ {
-  //@row
+
   constructor(data={}){
     _init_
   }

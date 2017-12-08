@@ -75,8 +75,10 @@ class ModelRender extends BaseRender {
   }
 
   searchFunc() {
+    let allowKey = new Set();
     let output = [];
     if (this.definition.primary.key) {
+      allowKey.add(this.definition.primary.fieldName);
       let func = `static fetchBy${py.camel(this.definition.primary.key, true)}(v){${EOL}`;
       func += `    let sql = 'select * from ${this.definition.name} where ${this.definition.primary.fieldName}=:v limit 1';${EOL}`;
       func += `    //@row${EOL}`;
@@ -103,6 +105,7 @@ class ModelRender extends BaseRender {
         let where = [];
         let params = [];
         for (let i in this.definition.index[k]) {
+          allowKey.add(this.definition.index[k][i].fieldName);
           func += `${py.camel(this.definition.index[k][i].key, true)}`;
           args.push(this.definition.index[k][i].key);
           where.push(`${this.definition.index[k][i].fieldName}=:${this.definition.index[k][i].key}`);
@@ -137,6 +140,7 @@ class ModelRender extends BaseRender {
         let where = [];
         let params = [];
         for (let i in this.definition.uniq[k]) {
+          allowKey.add(this.definition.uniq[k][i].fieldName);
           func += `${py.camel(this.definition.uniq[k][i].key, true)}`;
           args.push(this.definition.uniq[k][i].key);
           where.push(`${this.definition.uniq[k][i].fieldName}=:${this.definition.uniq[k][i].key}`);
@@ -164,6 +168,42 @@ class ModelRender extends BaseRender {
         output.push(func)
       }
     }
+    //fetchByAttr
+    let fetchByAttr = `static fetchByAttr(data={}, page=1, pageSize=10){${EOL}`;
+    fetchByAttr += `    let allowKey = ['${Array.from(allowKey).join(`','`)}'];${EOL}`;
+    fetchByAttr += `    let sql = 'select * from ${this.definition.name} where 1 ';${EOL}`;
+    fetchByAttr += `    if(Object.keys(data).length===0){
+      throw new Error('data param required');
+    }
+    for(let k in data){
+      let field = '';
+      if(allowKey.includes(k)){
+        field = k;
+      }else if(allowKey.includes(KeyMap[k])){
+        field = KeyMap[k];
+      }else{
+        throw new Error('Not Allow Fetching By [ "'+k+'" ]');
+      }
+      sql += 'and '+field+'=:'+k+'';
+    }
+    sql += ' order by ${this.definition.primary.fieldName} desc limit '+((page-1)*pageSize)+','+pageSize;
+    //@list
+    return new Promise((resolved, rejected)=>{
+      Connection.query({sql:sql,params:data}, (e, r)=>{
+        if(e){
+          rejected(e);
+        }else{
+          let result = [];
+          for(let k in r) {
+            result.push(new ${this.data._name_}(r[k]));
+          }
+          resolved(result);
+        }
+      });
+    });
+  `;
+    fetchByAttr += `}${EOL}`;
+    output.push(fetchByAttr);
     return output;
   }
 
