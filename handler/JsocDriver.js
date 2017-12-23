@@ -222,7 +222,7 @@ class JsocDriver {
         break;
       case 'unknown':
         result = this.definitions[ret.value];
-        result.message += ret.msg;
+        result.message += ret.msg||'';
         break;
       case 'object':
         for (let k in ret.value) {
@@ -234,6 +234,12 @@ class JsocDriver {
         break;
       case 'Literal':
         result = ret.value;
+        break;
+      case 'module':
+        result = this.formatReturn(ret.scope);
+        break;
+      case 'class':
+        result = this.formatReturn(ret.scope.ret);
         break;
     }
     return result;

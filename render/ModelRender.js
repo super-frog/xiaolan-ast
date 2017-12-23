@@ -71,6 +71,9 @@ class ModelRender extends BaseRender {
       case 'ref':
         return `new ${fieldDefinition.type.ref.name}({})`;
         break;
+      default:
+        return `''`;
+        break;
     }
   }
 
@@ -204,6 +207,28 @@ class ModelRender extends BaseRender {
   `;
     fetchByAttr += `}${EOL}`;
     output.push(fetchByAttr);
+
+    let raw = `static raw(sql='',params={}){
+    if(!sql.includes('limit')){
+      throw new Error('raw sql must with paging');
+    }
+    //@list
+    return new Promise((resolved, rejected)=>{
+      Connection.query({sql:sql,params:params}, (e, r)=>{
+        if(e){
+          rejected(e);
+        }else{
+          let result = [];
+          for(let k in r) {
+            result.push(new ${this.data._name_}(r[k]));
+          }
+          resolved(result);
+        }
+      });
+    });
+  }
+    `;
+    output.push(raw);
     return output;
   }
 
@@ -301,6 +326,7 @@ class ModelRender extends BaseRender {
     output += `        if(e) {${EOL}`;
     output += `          rejected(e);${EOL}`;
     output += `        }else{${EOL}`;
+    output += `          this.id = r.insertId;${EOL}`;
     output += `          resolved(true);${EOL}`;
     output += `        }${EOL}`;
     output += `      });${EOL}`;
