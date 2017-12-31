@@ -97,13 +97,13 @@ class JsocDriver {
     let astObjects = scope.astObjects();
     let result = {};
     result.method = route.method;
-    result.uri = route.uri;
+    result.path = route.path;
     result.query = {};
     result.params = {};
     result.body = {};
     let requestObj = null;
     for (let k in scope.def) {
-      if (scope.def[k].exports === true) {
+      if (scope.def[k] && scope.def[k].exports === true) {
         requestObj = scope.def[k].args;
         break;
       }
@@ -248,10 +248,10 @@ class JsocDriver {
   routing(routes) {
     let result = {};
     for (let k in routes) {
-      let [method, uri] = k.split(' ');
+      let [method, path] = k.split(' ');
       result[routes[k].handler] = {
         method,
-        uri,
+        path,
         handlers: [...routes[k].middleware, routes[k].handler]
       };
     }

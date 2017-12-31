@@ -187,7 +187,7 @@ class ModelRender extends BaseRender {
       }else{
         throw new Error('Not Allow Fetching By [ "'+k+'" ]');
       }
-      sql += 'and '+field+'=:'+k+'';
+      sql += ' and '+field+'=:'+k+'';
     }
     sql += ' order by ${this.definition.primary.fieldName} desc limit '+((page-1)*pageSize)+','+pageSize;
     //@list
