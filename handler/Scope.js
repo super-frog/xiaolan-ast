@@ -165,6 +165,14 @@ class Scope {
       let declare = {};
       if (declarations[k].init) {
         switch (declarations[k].init.type) {
+          case 'AwaitExpression':
+            declare = this.getReturnStruct(declarations[k].init.argument,declarations[k].id.name);
+            //todo
+            if (typeof declare !== 'string') {
+              this.def['@' + declarations[k].id.name] = declare;
+            }
+            break;
+          break;
           case 'Literal':
             this.def['@' + declarations[k].id.name] = {
               type: typeof declarations[k].init.value,
@@ -344,7 +352,13 @@ class Scope {
           }
         } else {
 
-          this.def['@' + this.memberExpressionLeftName(expression.expression.left)] = this.getRightStruct(expression.expression.right);
+          let _tmp = this.def['@' + this.memberExpressionLeftName(expression.expression.left)] = this.getRightStruct(expression.expression.right);
+          
+          if(expression.expression.left.type==='MemberExpression'&&this.def['@'+expression.expression.left.object.name] && this.def['@'+expression.expression.left.object.name].type==='object'){
+            let append = {};
+            append[expression.expression.left.property.name] = _tmp;
+            Object.assign(this.def['@'+expression.expression.left.object.name].value,append);
+          }
 
           this.var[expression.expression.left.name] = expression.expression.left.name;
         }
@@ -413,11 +427,12 @@ class Scope {
           type: 'Identifier',
           name: 'Arrow' + (this.AI++),
         };
-
+        
         this.functionDeclaration(right);
 
         return this.getDefStruct(this.getIdentifierDef(right.id.name));
         break;
+    
       case 'LogicalExpression':
         return this.getLogicalStruct(right);
         break;
@@ -465,6 +480,7 @@ class Scope {
 
   //从当前scope的定义里获取定义的返回结构
   getDefStruct(name) {
+    
     if (typeof name !== 'string') {
       return name;
     }
