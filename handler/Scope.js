@@ -358,6 +358,8 @@ class Scope {
             let append = {};
             append[expression.expression.left.property.name] = _tmp;
             Object.assign(this.def['@'+expression.expression.left.object.name].value,append);
+          }else if(expression.expression.left.type==='MemberExpression'&&this.def['@'+expression.expression.left.object.name] && this.def['@'+expression.expression.left.object.name].type==='array'){
+            console.log(`${this.file || this.parent.file}: 不允许往数组结构追加属性!`);process.exit(0);
           }
 
           this.var[expression.expression.left.name] = expression.expression.left.name;
