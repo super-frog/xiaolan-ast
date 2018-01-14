@@ -91,7 +91,7 @@ class ObjectRender extends BaseRender {
         r.toFile();
         continue;
       }
-      output.push(`this.${props[k].name} = options.${props[k].name}${props[k].definition.requirement===true?``:` || ${this.getDefaultValue(props[k].definition)}`};`);
+      output.push(`this.${props[k].name} = options.${props[k].name}${props[k].definition.requirement === true ? `` : ` || ${this.getDefaultValue(props[k].definition)}`};`);
     }
     return output;
   }
@@ -107,7 +107,11 @@ class ObjectRender extends BaseRender {
         return `${fieldDefinition.defaultValue || 0}`;
         break;
       case 'array':
-        return `['${fieldDefinition.defaultValue.join('\',\'')}']`;
+        if (fieldDefinition.defaultValue.length) {
+          return `['${fieldDefinition.defaultValue.join('\',\'')}']`;
+        } else {
+          return '[]';
+        }
         break;
       case 'ref':
         return `new ${fieldDefinition.type.ref.name}({})`;
@@ -136,7 +140,7 @@ class ObjectRender extends BaseRender {
             output += `    }${EOL}${EOL}`;
             break;
           case 'number':
-            output += `    if(!(Number.isInteger(this.${props[k].name}) && (this.${props[k].name}>=${props[k].definition.type.range[0]}) && (this.${props[k].name}<=${props[k].definition.type.range[1]}))){${EOL}`;
+            output += `    if(!(!Number.isNaN(this.${props[k].name}) && (this.${props[k].name}>=${props[k].definition.type.range[0]}) && (this.${props[k].name}<=${props[k].definition.type.range[1]}))){${EOL}`;
             output += `      throw new Error('type validate failed: [${props[k].name}]: Number must in range ${props[k].definition.type.range[0]} to ${props[k].definition.type.range[1]}');${EOL}`;
             output += `    }${EOL}${EOL}`;
             break;
@@ -177,7 +181,7 @@ class ObjectRender extends BaseRender {
       if (props[k].definition.in === undefined) {
         continue;
       }
-      if(props[k].definition.requirement === true){
+      if (props[k].definition.requirement === true) {
         output += `    if(!this.pick(req, '${props[k].definition.in}.${props[k].definition.key || props[k].name}')){
       throw new Error("Requirement : [${props[k].definition.key || props[k].name}]");
     }${EOL}`;
@@ -191,8 +195,8 @@ class ObjectRender extends BaseRender {
     return output;
   }
 
-  formatter(type){
-    switch (type){
+  formatter(type) {
+    switch (type) {
       case 'string':
         return `'' + `;
         break;
@@ -213,8 +217,8 @@ class ObjectRender extends BaseRender {
     return output;
   }
 
-  typeMap(name){
-    switch (name){
+  typeMap(name) {
+    switch (name) {
       case 'number':
       case 'float':
         return 'number';

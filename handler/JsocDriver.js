@@ -79,7 +79,12 @@ class JsocDriver {
     let result = [];
 
     for (let k in ret) {
-
+      if (ret[k] === null) {
+        result.push({
+          type: 'NOT SURE'
+        });
+        continue;
+      }
       switch (ret[k].type) {
         case 'func':
           result = result.concat(this.fattenReturn(ret[k].scope.ret));
@@ -123,10 +128,10 @@ class JsocDriver {
           _node[_k] = _node[_k] || {};
           _node = _node[_k];
         }
-        if(objectDefinition.props[i].definition.key){
+        if (objectDefinition.props[i].definition.key) {
           _node[objectDefinition.props[i].definition.key] = _node[objectDefinition.props[i].definition.key] || {};
           _node = _node[objectDefinition.props[i].definition.key];
-        }else{
+        } else {
           _node[i] = _node[i] || {};
           _node = _node[i];
         }
@@ -221,12 +226,22 @@ class JsocDriver {
 
         break;
       case 'unknown':
+      console.log(ret);process.exit(0);
         result = this.definitions[ret.value];
-        result.message += ret.msg||'';
+        if (result) {
+          result.message = (result.message || '') + ret.msg || '';
+        }else{
+          result = (new XiaolanError({
+            code: -1,
+            httpStatus: 500,
+            message: 'Internal Error: not defined',
+            name: 'INTERNAL_ERROR',
+          })).obj();
+        }
         break;
       case 'object':
         for (let k in ret.value) {
-          result[k] = ret.value[k].value.type;
+          result[k] = (ret.value[k] && ret.value[k].value) ? ret.value[k].value.type : 'not sure';
         }
         break;
       case 'array':

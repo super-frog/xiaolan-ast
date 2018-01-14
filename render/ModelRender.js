@@ -19,7 +19,10 @@ class ModelRender extends BaseRender {
     this.data._init_ = this.classConstructorBody();
     this.data._validate_ = '';
     this.data._method_ = [];
+    
     this.data._method_ = this.searchFunc();
+    this.data._method_.push(this.tableName());
+    this.data._method_.push(this.count());
     this.data._method_.push(this.toObj());
     this.data._method_.push(this.toRow());
     this.data._method_.push(this.validate());
@@ -42,6 +45,48 @@ class ModelRender extends BaseRender {
         this.output.push(tpl[k]);
       }
     }
+  }
+
+  tableName(){
+    let output = [];
+    output.push(`static table(){
+    return TableName;
+  }
+  `);
+    return output;
+  }
+
+  count(){
+    let output = [];
+    let countFunc = `static count(expression,where){
+    let sql = 'select count('+expression+') from \`${this.definition.name}\` ';
+    let conditions = [];
+    let params = {};
+    for(let k in where){
+      conditions.push(' \`'+k+'\`=:'+k);
+      params[k] = where[k];
+    }
+    if(conditions.length){
+      sql += 'where '+conditions.join(' and ');
+    }
+    //@row
+    return new Promise((resolved,rejected)=>{
+      Connection.query({sql:sql,params:params}, (e,r)=>{
+        if(e){
+          rejected(e);
+        }else{
+          if(r[0]){
+            resolved(r[0]['count('+expression+')']);
+          }else{
+            resolved(null);
+          }
+        }
+      });
+    });
+  }
+  `;
+    output.push(countFunc);
+    return output;
   }
 
   classConstructorBody() {
@@ -83,7 +128,7 @@ class ModelRender extends BaseRender {
     if (this.definition.primary.key) {
       allowKey.add(this.definition.primary.fieldName);
       let func = `static fetchBy${py.camel(this.definition.primary.key, true)}(v){${EOL}`;
-      func += `    let sql = 'select * from ${this.definition.name} where ${this.definition.primary.fieldName}=:v limit 1';${EOL}`;
+      func += `    let sql = 'select * from \`${this.definition.name}\` where \`${this.definition.primary.fieldName}\`=:v limit 1';${EOL}`;
       func += `    //@row${EOL}`;
       func += `    return new Promise((resolved, rejected) => {
       Connection.query({sql:sql, params:{v:v}}, (e ,r)=>{
@@ -111,13 +156,13 @@ class ModelRender extends BaseRender {
           allowKey.add(this.definition.index[k][i].fieldName);
           func += `${py.camel(this.definition.index[k][i].key, true)}`;
           args.push(this.definition.index[k][i].key);
-          where.push(`${this.definition.index[k][i].fieldName}=:${this.definition.index[k][i].key}`);
+          where.push(`\`${this.definition.index[k][i].fieldName}\`=:${this.definition.index[k][i].key}`);
           params.push(`${this.definition.index[k][i].key}: ${this.definition.index[k][i].key}`);
         }
         args.push(`page=1`);
         args.push(`pageSize=10`);
         func += `(${args.join(', ')}){${EOL}`;
-        func += `    let sql = 'select * from ${this.definition.name} where ${where.join(' and ')} order by ${this.definition.primary.fieldName} desc limit \'+((page-1)*pageSize)+\',\'+pageSize+\'';${EOL}`;
+        func += `    let sql = 'select * from \`${this.definition.name}\` where ${where.join(' and ')} order by \`${this.definition.primary.fieldName}\` desc limit \'+((page-1)*pageSize)+\',\'+pageSize+\'';${EOL}`;
         func += `    //@list${EOL}`;
         func += `    return new Promise((resolved, rejected) => {
       Connection.query({sql:sql, params:{${params.join(', ')}}}, (e ,r)=>{
@@ -146,13 +191,13 @@ class ModelRender extends BaseRender {
           allowKey.add(this.definition.uniq[k][i].fieldName);
           func += `${py.camel(this.definition.uniq[k][i].key, true)}`;
           args.push(this.definition.uniq[k][i].key);
-          where.push(`${this.definition.uniq[k][i].fieldName}=:${this.definition.uniq[k][i].key}`);
+          where.push(`\`${this.definition.uniq[k][i].fieldName}\`=:${this.definition.uniq[k][i].key}`);
           params.push(`${this.definition.uniq[k][i].key}: ${this.definition.uniq[k][i].key}`);
         }
         args.push(`page=1`);
         args.push(`pageSize=10`);
         func += `(${args.join(', ')}){${EOL}`;
-        func += `    let sql = 'select * from ${this.definition.name} where ${where.join(' and ')} order by ${this.definition.primary.fieldName} desc limit \'+((page-1)*pageSize)+\',\'+pageSize+\'';${EOL}`;
+        func += `    let sql = 'select * from \`${this.definition.name}\` where ${where.join(' and ')} order by \`${this.definition.primary.fieldName}\` desc limit \'+((page-1)*pageSize)+\',\'+pageSize+\'';${EOL}`;
         func += `    //@row${EOL}`;
         func += `    return new Promise((resolved, rejected) => {
       Connection.query({sql:sql, params:{${params.join(', ')}}}, (e ,r)=>{
@@ -174,7 +219,7 @@ class ModelRender extends BaseRender {
     //fetchByAttr
     let fetchByAttr = `static fetchByAttr(data={}, page=1, pageSize=10){${EOL}`;
     fetchByAttr += `    let allowKey = ['${Array.from(allowKey).join(`','`)}'];${EOL}`;
-    fetchByAttr += `    let sql = 'select * from ${this.definition.name} where 1 ';${EOL}`;
+    fetchByAttr += `    let sql = 'select * from \`${this.definition.name}\` where 1 ';${EOL}`;
     fetchByAttr += `    if(Object.keys(data).length===0){
       throw new Error('data param required');
     }
@@ -187,9 +232,9 @@ class ModelRender extends BaseRender {
       }else{
         throw new Error('Not Allow Fetching By [ "'+k+'" ]');
       }
-      sql += ' and '+field+'=:'+k+'';
+      sql += ' and \`'+field+'\`=:'+k+'';
     }
-    sql += ' order by ${this.definition.primary.fieldName} desc limit '+((page-1)*pageSize)+','+pageSize;
+    sql += ' order by \`${this.definition.primary.fieldName}\` desc limit '+((page-1)*pageSize)+','+pageSize;
     //@list
     return new Promise((resolved, rejected)=>{
       Connection.query({sql:sql,params:data}, (e, r)=>{
@@ -310,7 +355,9 @@ class ModelRender extends BaseRender {
     output += `    //@true${EOL}`;
     output += `    return new Promise((resolved, rejected) => {${EOL}`;
     output += `      let data = this.data();${EOL}`;
-    output += '      let sql = `insert into ${TableName} set `;'+EOL;
+    output += `      data.createTime = data.createTime||Number.parseInt(Date.now()/1000);${EOL}`;
+    output += `      data.updateTime = data.updateTime||Number.parseInt(Date.now()/1000);${EOL}`;
+    output += '      let sql = `insert into \\\`${TableName}\\\` set `;'+EOL;
     output += `      let fields = [];${EOL}`;
     output += `      for(let k in data){${EOL}`;
     if(this.definition.primary) {
@@ -318,15 +365,17 @@ class ModelRender extends BaseRender {
       output += `          continue;${EOL}`;
       output += `        }${EOL}`;
     }
-    output += '        fields.push(`${KeyMap[k]}=:${k}`);'+EOL;
+    output += '        fields.push(`\\\`${KeyMap[k]}\\\`=:${k}`);'+EOL;
     output += `      }${EOL}`;
     output += `      sql += fields.join(',');${EOL}`;
 
-    output += `      Connection.query({sql: sql,params:this.data()},(e, r) => {${EOL}`;
+    output += `      Connection.query({sql: sql,params:data},(e, r) => {${EOL}`;
     output += `        if(e) {${EOL}`;
     output += `          rejected(e);${EOL}`;
     output += `        }else{${EOL}`;
     output += `          this.id = r.insertId;${EOL}`;
+    output += `          this.createTime = data.createTime;${EOL}`;
+    output += `          this.updateTime = data.updateTime;${EOL}`;
     output += `          resolved(true);${EOL}`;
     output += `        }${EOL}`;
     output += `      });${EOL}`;
@@ -342,8 +391,9 @@ class ModelRender extends BaseRender {
     output += `    }${EOL}`;
     output += `    //@true${EOL}`;
     output += `    return new Promise((resolved, rejected) => {${EOL}`;
-    output += '      let sql = `update ${TableName} set `;'+EOL;
+    output += '      let sql = `update \\\`${TableName}\\\` set `;'+EOL;
     output += `      let data = this.data();${EOL}`;
+    output += `      data.updateTime = data.updateTime||Number.parseInt(Date.now()/1000);${EOL}`;
     output += `      let fields = [];${EOL}`;
     output += `      for(let k in data){${EOL}`;
     if(this.definition.primary) {
@@ -351,14 +401,14 @@ class ModelRender extends BaseRender {
       output += `          continue;${EOL}`;
       output += `        }${EOL}`;
     }
-    output += '        fields.push(`${KeyMap[k]}=:${k}`);'+EOL;
+    output += '        fields.push(`\\\`${KeyMap[k]}\\\`=:${k}`);'+EOL;
     output += `      }${EOL}`;
     output += `      sql += fields.join(',');${EOL}`;
 
 
 
     let primary = this.definition.primary.fieldName;
-    output += '      sql += ` where ' + primary + '=:' + this.definition.primary.key + '`;' + EOL;
+    output += '      sql += ` where \\\`' + primary + '\\\`=:' + this.definition.primary.key + '`;' + EOL;
     output += `      Connection.query({sql: sql,params:data},(e, r) => {${EOL}`;
     output += `        if(e) {${EOL}`;
     output += `          rejected(e);${EOL}`;

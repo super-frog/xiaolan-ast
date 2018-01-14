@@ -602,7 +602,7 @@ class Scope {
           id = `${callExpression.callee.object.name}.${callExpression.callee.property.name}`;
         }
 
-        if (this.parent.def['@' + object] && this.parent.def['@' + object].type === 'module') {
+        if (this.parent && this.parent.def['@' + object] && this.parent.def['@' + object].type === 'module') {
           this.def['@' + id] = this.parent.getDefStruct(this.parent.def['@' + object].scope.scope.def['@' + property].scope.ret[0]) || {};
         }
         return this.def['@' + id];
