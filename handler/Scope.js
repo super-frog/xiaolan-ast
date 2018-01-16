@@ -551,9 +551,11 @@ class Scope {
     let result = {};
     for (let k in props) {
       result[props[k].key.name] = {
-        name: props[k].key.name,
-        type: this.getMemberExpressionType(props[k].value),
-        value: props[k].value.value,
+        type:'Literal',
+        value:{
+          type: this.getMemberExpressionType(props[k].value),
+          value: props[k].value.value,
+        }
       };
      
     }
