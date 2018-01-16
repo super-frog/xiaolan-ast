@@ -16,10 +16,11 @@ class JsocDriver {
   constructor(projectRoot, specHost = '') {
     this.host = specHost;
     this.projectRoot = projectRoot;
-    this.definitions = {};
+    this.errors = {};
     this.apis = {};
     this.loadErrorDefinitions();
     this.scan();
+    delete this.projectRoot;
     fs.writeFileSync(process.cwd() + '/jsoc.json', JSON.stringify(this, null, 2));
     console.log('File generated in : ' + process.cwd() + '/jsoc.json');
   }
@@ -51,7 +52,7 @@ class JsocDriver {
         returns[k] = this.formatReturn(returns[k]);
         if (returns[k].code === undefined) {
           returns[k] = {
-            code: 0,
+            code: 200,
             data: returns[k],
             message: ''
           };
@@ -197,21 +198,21 @@ class JsocDriver {
     }
     let errorDefinitions = require(`${this.projectRoot}/definitions/errors/Error.gen.js`);
     for (let k in errorDefinitions) {
-      this.definitions['error.' + errorDefinitions[k].name] = (new XiaolanError(errorDefinitions[k])).obj();
+      this.errors['error.' + errorDefinitions[k].name] = (new XiaolanError(errorDefinitions[k])).obj();
     }
-    this.definitions['error.INTERNAL_ERROR'] = (new XiaolanError({
+    this.errors['error.INTERNAL_ERROR'] = (new XiaolanError({
       code: -1,
       httpStatus: 500,
       message: 'Internal Error',
       name: 'INTERNAL_ERROR',
     })).obj();
-    this.definitions['error.BAD_REQUEST'] = (new XiaolanError({
+    this.errors['error.BAD_REQUEST'] = (new XiaolanError({
       name: 'BAD_REQUEST',
       httpStatus: 400,
       code: -2,
       message: '入参检测错误',
     })).obj();
-    this.definitions['error.NOT_FOUND'] = (new XiaolanError({
+    this.errors['error.NOT_FOUND'] = (new XiaolanError({
       name: 'NOT_FOUND',
       httpStatus: 404,
       code: -3,
@@ -226,8 +227,7 @@ class JsocDriver {
 
         break;
       case 'unknown':
-      console.log(ret);process.exit(0);
-        result = this.definitions[ret.value];
+        result = this.errors[ret.value];
         if (result) {
           result.message = (result.message || '') + ret.msg || '';
         }else{

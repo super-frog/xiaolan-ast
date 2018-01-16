@@ -30,7 +30,9 @@ class Scope {
       ast = file;
       this.dir = '';
     }
-
+    // if (name == 'Arrow1') {
+    //   console.log(JSON.stringify(ast)); process.exit(0);
+    // }
     this.desc = this.getDesc(ast) || name;
 
     this.def = {};
@@ -52,9 +54,7 @@ class Scope {
     });
     this.AI = 1;
     this.ast = ast;
-// if(this.name === 'Arrow1'){
-//   console.log(JSON.stringify(ast));process.exit(0);//todo
-// }
+
     this.run(ast);
   }
 
@@ -166,13 +166,13 @@ class Scope {
       if (declarations[k].init) {
         switch (declarations[k].init.type) {
           case 'AwaitExpression':
-            declare = this.getReturnStruct(declarations[k].init.argument,declarations[k].id.name);
+            declare = this.getReturnStruct(declarations[k].init.argument, declarations[k].id.name);
             //todo
             if (typeof declare !== 'string') {
               this.def['@' + declarations[k].id.name] = declare;
             }
             break;
-          break;
+            break;
           case 'Literal':
             this.def['@' + declarations[k].id.name] = {
               type: typeof declarations[k].init.value,
@@ -248,7 +248,7 @@ class Scope {
       case 'ArrayExpression':
         return {
           type: 'array',
-          value: stat.argument.elements[0] ? this.returnStatement({argument: stat.argument.elements[0]}) : 'unknown',
+          value: stat.argument.elements[0] ? this.returnStatement({ argument: stat.argument.elements[0] }) : 'unknown',
         };
         break;
       case 'NewExpression':
@@ -288,6 +288,19 @@ class Scope {
       case 'AssignmentExpression':
         let right = stat.argument.right;
         return this.returnStatement(right);
+        break;
+      case 'ObjectExpression':
+        let obj = {
+          type: 'object',
+          value: {}
+        };
+        for (let k in stat.argument.properties) {
+          obj.value[stat.argument.properties[k].key.name] = {
+            name: stat.argument.properties[k].key.name,
+            type: typeof stat.argument.properties[k].value.value
+          };
+        }
+        return obj;
         break;
       default:
         return {
@@ -353,13 +366,13 @@ class Scope {
         } else {
 
           let _tmp = this.def['@' + this.memberExpressionLeftName(expression.expression.left)] = this.getRightStruct(expression.expression.right);
-          
-          if(expression.expression.left.type==='MemberExpression'&&this.def['@'+expression.expression.left.object.name] && this.def['@'+expression.expression.left.object.name].type==='object'){
+
+          if (expression.expression.left.type === 'MemberExpression' && this.def['@' + expression.expression.left.object.name] && this.def['@' + expression.expression.left.object.name].type === 'object') {
             let append = {};
             append[expression.expression.left.property.name] = _tmp;
-            Object.assign(this.def['@'+expression.expression.left.object.name].value,append);
-          }else if(expression.expression.left.type==='MemberExpression'&&this.def['@'+expression.expression.left.object.name] && this.def['@'+expression.expression.left.object.name].type==='array'){
-            console.log(`${this.file || this.parent.file}: 不允许往数组结构追加属性!`);process.exit(0);
+            Object.assign(this.def['@' + expression.expression.left.object.name].value, append);
+          } else if (expression.expression.left.type === 'MemberExpression' && this.def['@' + expression.expression.left.object.name] && this.def['@' + expression.expression.left.object.name].type === 'array') {
+            console.log(`${this.file || this.parent.file}: 不允许往数组结构追加属性!`); process.exit(0);
           }
 
           this.var[expression.expression.left.name] = expression.expression.left.name;
@@ -429,12 +442,12 @@ class Scope {
           type: 'Identifier',
           name: 'Arrow' + (this.AI++),
         };
-        
+
         this.functionDeclaration(right);
 
         return this.getDefStruct(this.getIdentifierDef(right.id.name));
         break;
-    
+
       case 'LogicalExpression':
         return this.getLogicalStruct(right);
         break;
@@ -482,7 +495,7 @@ class Scope {
 
   //从当前scope的定义里获取定义的返回结构
   getDefStruct(name) {
-    
+
     if (typeof name !== 'string') {
       return name;
     }
@@ -539,11 +552,33 @@ class Scope {
     for (let k in props) {
       result[props[k].key.name] = {
         name: props[k].key.name,
-        type: typeof props[k].value.value,
+        type: this.getMemberExpressionType(props[k].value),
         value: props[k].value.value,
       };
+     
     }
+
     return result;
+  }
+
+  getMemberExpressionType(expression) {
+    switch (expression.type) {
+      case 'MemberExpression':
+        if(expression.object&&this.def['@'+expression.object.name] && this.def['@'+expression.object.name].type === 'object'){
+          if(this.def['@'+expression.object.name].value && this.def['@'+expression.object.name].value[expression.property.name]){
+            return this.def['@'+expression.object.name].value[expression.property.name].value.type;
+          }else{
+            return 'unknown';  
+          }
+        }else{
+          return 'unknown';
+        }
+        break;
+      default:
+        return expression.value?typeof expression.value:'unknown';
+        break;
+    }
+
   }
 
   //处理调用语句的返回结构
