@@ -7,7 +7,7 @@ const fs = require('fs');
 
 module.exports = (file)=>{
   let route = require(file);
-  return lookup(route);
+  return lookup(route.map());
 };
 
 function lookup(route) {
