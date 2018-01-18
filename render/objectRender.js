@@ -3,7 +3,8 @@
  */
 
 'use strict';
-
+const fs = require('fs');
+const path = require('path');
 const EOL = require('os').EOL;
 const templateBank = require('../tpl/templateBank');
 const py = require('frog-lib').pinyin;
@@ -29,6 +30,10 @@ class ObjectRender extends BaseRender {
       this.data._method_.push(this.enumFunc(k, definition.enumSet[k]));
     }
 
+    if(Object.keys(definition.enumSet).length){
+      this.listEnum(definition.enumSet);
+    }
+    
     this.data._method_.push(this.validateFunc());
 
     this.data._method_.push(this.pickFunc());
@@ -46,6 +51,12 @@ class ObjectRender extends BaseRender {
         this.output.push(tpl[k]);
       }
     }
+  }
+
+  listEnum(enumSet){
+    let content = `module.exports = ${JSON.stringify(enumSet,null,2)};`
+    fs.writeFileSync(`${path.resolve(this.ouputPath)}/Enum.js`, content);
+    console.log('File generated in : ' + `${path.resolve(this.ouputPath)}/Enum.js`);
   }
 
   pickFunc() {
@@ -121,7 +132,7 @@ class ObjectRender extends BaseRender {
 
   enumFunc(field, enumSet) {
     return `get${py.camel(field, true)}(){
-    return ['${enumSet.join('\',\'')}'][this.${field}];
+    return (${JSON.stringify(enumSet.options)})[this.${field}];
   }${EOL}`;
   }
 
@@ -145,7 +156,7 @@ class ObjectRender extends BaseRender {
             output += `    }${EOL}${EOL}`;
             break;
           case 'enum':
-            output += `    if(['${props[k].definition.type.options.join('\',\'')}'][this.${props[k].name}] === undefined){${EOL}`;
+            output += `    if((${JSON.stringify(props[k].definition.type.options)})[this.${props[k].name}] === undefined){${EOL}`;
             output += `      throw new Error('type validate failed: [${props[k].name}]: ${props[k].name} can only choosing from ["${this.arrayDisplay(props[k].definition.type.options)}"]');${EOL}`;
             output += `    }${EOL}${EOL}`;
             break;

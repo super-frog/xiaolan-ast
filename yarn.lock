@@ -44,9 +44,9 @@ destroy@~1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/destroy/-/destroy-1.0.4.tgz#978857442c44749e4206613e37946205826abd80"
 
-dotenvr@^0.1.10:
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/dotenvr/-/dotenvr-0.1.10.tgz#3ace1bb3ff79a7890254bedc213c65b2e396f7b0"
+dotenvr@^0.1.13:
+  version "0.1.13"
+  resolved "https://registry.yarnpkg.com/dotenvr/-/dotenvr-0.1.13.tgz#45e6b5b52807620fbd6dba35d957ecf4c90501ac"
 
 double-ended-queue@^2.1.0-0:
   version "2.1.0-0"
@@ -281,17 +281,21 @@ xiaolan-router@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/xiaolan-router/-/xiaolan-router-1.0.1.tgz#e81c4493aa15af0637177480cf91735df9948089"
 
-xiaolan@^1.5.21:
-  version "1.5.21"
-  resolved "https://registry.yarnpkg.com/xiaolan/-/xiaolan-1.5.21.tgz#25c6f2e4cf2093aa7a23313191ca3ae61a818baa"
+xiaolan-router@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/xiaolan-router/-/xiaolan-router-1.0.2.tgz#4fd882ca51148eea84d9c61f8845ac6e0241a70f"
+
+xiaolan@^1.6.9:
+  version "1.6.9"
+  resolved "https://registry.yarnpkg.com/xiaolan/-/xiaolan-1.6.9.tgz#03f27448e02a9d3d577257de80bea0e9c40a3969"
   dependencies:
     async "^2.5.0"
     colors "^1.1.2"
     crypto "0.0.3"
-    dotenvr "^0.1.10"
+    dotenvr "^0.1.13"
     easymysql "^0.2.7"
     fy-mysql "^0.2.13"
     redis "^2.2.5"
     serve-static "^1.9.3"
     xiaolan-db "^1.2.9"
-    xiaolan-router "^1.0.1"
+    xiaolan-router "^1.0.2"

@@ -28,6 +28,7 @@ module.exports = (file, output) => {
 
     if (item.type && handlerMap[item.type]) {
       let definition = handlerMap[item.type](item);
+      //console.log(JSON.stringify(definition));process.exit(0);
       if(definition) {
         let r = new render(definition, output);
         r.toFile();

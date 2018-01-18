@@ -31,7 +31,7 @@ class JsocDriver {
       process.exit(-1);
     }
     let routes = require(`${this.projectRoot}/routes.js`);
-    routes = this.routing(routes);
+    routes = this.routing(routes.map());
 
     for (let k in routes) {
       let scope;
