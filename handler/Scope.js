@@ -208,7 +208,7 @@ class Scope {
           case 'ArrayExpression':
             declare = {
               type: 'array',
-              elements: declarations[k].init.elements[0] ? typeof declarations[k].init.elements[0].value : 'unknown',
+              elements: declarations[k].init.elements[0] ? typeof declarations[k].init.elements[0].value : 'NOT_SURE',
             };
             break;
           case 'BinaryExpression':
@@ -226,7 +226,7 @@ class Scope {
 
   //专门处理返回语句
   returnStatement(stat) {
-    if (stat.leadingComments && stat.leadingComments[0] && ['@row', '@list', '@true', '@this'].includes(stat.leadingComments[0].value)) {
+    if (stat.leadingComments && stat.leadingComments[0] && ['@row', '@list', '@true', '@this','@number'].includes(stat.leadingComments[0].value)) {
       if (stat.leadingComments[0].value === '@row') {
         return this.getClassRet(this.parent);
       } else if (stat.leadingComments[0].value === '@list') {
@@ -239,7 +239,12 @@ class Scope {
           type: 'Literal',
           value: true
         };
-      } else if (stat.leadingComments[0].value === '@this') {
+      }else if(stat.leadingComments[0].value === '@number'){
+        return {
+          type: 'number',
+          value: 10,
+        };
+      }else if (stat.leadingComments[0].value === '@this') {
         return this.parent.parent.name;
       }
     }
@@ -248,7 +253,7 @@ class Scope {
       case 'ArrayExpression':
         return {
           type: 'array',
-          value: stat.argument.elements[0] ? this.returnStatement({ argument: stat.argument.elements[0] }) : 'unknown',
+          value: stat.argument.elements[0] ? this.returnStatement({ argument: stat.argument.elements[0] }) : 'NOT_SURE',
         };
         break;
       case 'NewExpression':
@@ -276,7 +281,7 @@ class Scope {
           //this.def['@' + id] = this.parent.def['@' + object].scope.def['@' + property].scope.ret || {};
         } else {
           this.def['@' + id] = {
-            type: 'unknown',
+            type: 'NOT_SURE',
             value: id
           };
         }
@@ -304,7 +309,7 @@ class Scope {
         break;
       default:
         return {
-          type: 'unknown',
+          type: 'NOT_SURE',
           value: null,
         };
         break;
@@ -405,7 +410,7 @@ class Scope {
           if (this.memberExpressionLeftName(callee.object).startsWith('error')) {
             if (callee.property.name === 'withMessage') {
               return {
-                type: 'unknown',
+                type: 'NOT_SURE',
                 value: this.memberExpressionLeftName(callee.object),
                 msg: args[0] ? args[0].value : '',
               };
@@ -413,7 +418,7 @@ class Scope {
           }
           //todo 暂时忽视这个问题
           return {
-            type: 'unknown'
+            type: 'NOT_SURE'
           };
         }
 
@@ -467,7 +472,7 @@ class Scope {
       case 'ArrayExpression':
         return {
           type: 'array',
-          elements: right.elements[0] ? typeof right.elements[0].value : 'unknown',
+          elements: right.elements[0] ? typeof right.elements[0].value : 'NOT_SURE',
         };
         break;
       case 'NewExpression':
@@ -570,14 +575,14 @@ class Scope {
           if(this.def['@'+expression.object.name].value && this.def['@'+expression.object.name].value[expression.property.name]){
             return this.def['@'+expression.object.name].value[expression.property.name].value.type;
           }else{
-            return 'unknown';  
+            return 'NOT_SURE';  
           }
         }else{
-          return 'unknown';
+          return 'NOT_SURE';
         }
         break;
       default:
-        return expression.value?typeof expression.value:'unknown';
+        return expression.value?typeof expression.value:'NOT_SURE';
         break;
     }
 

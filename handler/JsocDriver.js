@@ -82,7 +82,7 @@ class JsocDriver {
     for (let k in ret) {
       if (ret[k] === null) {
         result.push({
-          type: 'NOT SURE'
+          type: 'NOT_SURE'
         });
         continue;
       }
@@ -241,7 +241,7 @@ class JsocDriver {
         break;
       case 'object':
         for (let k in ret.value) {
-          result[k] = (ret.value[k] && ret.value[k].value) ? ret.value[k].value.type : 'not sure';
+          result[k] = (ret.value[k] && ret.value[k].value) ? ret.value[k].value.type : 'NOT_SURE';
         }
         break;
       case 'array':
