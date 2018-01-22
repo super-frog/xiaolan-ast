@@ -21,6 +21,7 @@ class JsocDriver {
     this.loadErrorDefinitions();
     this.scan();
     delete this.projectRoot;
+    this.mergeJsoc();
     fs.writeFileSync(process.cwd() + '/jsoc.json', JSON.stringify(this, null, 2));
     console.log('File generated in : ' + process.cwd() + '/jsoc.json');
   }
@@ -230,7 +231,7 @@ class JsocDriver {
         result = this.errors[ret.value];
         if (result) {
           result.message = (result.message || '') + ret.msg || '';
-        }else{
+        } else {
           result = (new XiaolanError({
             code: -1,
             httpStatus: 500,
@@ -273,6 +274,38 @@ class JsocDriver {
     return result;
   }
 
+  mergeJsoc() {
+    let oldJsoc = require(`${process.cwd()}/jsoc.json`);
+    for (let k in this.apis) {
+      if (oldJsoc.apis[k] === undefined) {
+        continue;
+      }
+      let success = this.apis[k].response.body.success;
+      let successOld = null;
+      try {
+        successOld = oldJsoc.apis[k].response.body.success;
+      } catch (e) {
+        console.log('Bad old jsoc.json ! removed it first!'.red); process.exit(0);
+      }
+      for (let i in success) {
+        this.mergeRes(success[i], successOld[i]);
+      }
+    }
+  }
+
+  mergeRes(n, o) {
+    for (let k in n) {
+      if (Object.keys(n[k]).includes('_type')) {
+        if (n[k]._type === 'NOT_SURE' && o[k]) {
+          n[k]._type = o[k]._type || n[k]._type;
+        }
+      } else {
+        if (o[k]) {
+          this.mergeRes(n[k], o[k]);
+        }
+      }
+    }
+  }
 }
 
 module.exports = JsocDriver;
