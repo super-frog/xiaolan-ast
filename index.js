@@ -10,6 +10,7 @@ const ObjectDefinition = require('./handler/ObjectDefinition');
 const RouteDefinition = require('./handler/RouteDefinition');
 const HelperDefinition = require('./handler/HelperDefinition');
 const ModelRender = require('./render/ModelRender');
+const ClientRender = require('./render/ClientRender');
 const JsocDriver = require('./handler/JsocDriver');
 
 
@@ -28,7 +29,7 @@ index.genClass = (file, output) => {
 index.genModel = (file, output) => {
   let tableDefinition = require(path.resolve(file));
 
-  return new ModelRender(tableDefinition,output);
+  return new ModelRender(tableDefinition, output);
 };
 
 index.findHandler = (file) => {
@@ -43,6 +44,10 @@ index.genJsoc = (projectRoot) => {
 
 index.genHelper = (file) => {
   return HelperDefinition(path.resolve(file));
+};
+
+index.genClient = (projectName, output, specJsoc) => {
+  return (new ClientRender(projectName, output, specJsoc));
 };
 
 module.exports = index;

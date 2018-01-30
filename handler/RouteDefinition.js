@@ -1,5 +1,6 @@
 /**
  * Created by lanhao on 2017/9/16.
+ * 通过route获取handler的方法
  */
 
 'use strict';

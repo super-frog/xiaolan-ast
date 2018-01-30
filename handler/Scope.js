@@ -1,5 +1,6 @@
 /**
  * Created by lanhao on 2017/9/13.
+ * 通用的ast分析
  */
 
 'use strict';

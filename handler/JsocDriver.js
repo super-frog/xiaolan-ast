@@ -275,20 +275,22 @@ class JsocDriver {
   }
 
   mergeJsoc() {
-    let oldJsoc = require(`${process.cwd()}/jsoc.json`);
-    for (let k in this.apis) {
-      if (oldJsoc.apis[k] === undefined) {
-        continue;
-      }
-      let success = this.apis[k].response.body.success;
-      let successOld = null;
-      try {
-        successOld = oldJsoc.apis[k].response.body.success;
-      } catch (e) {
-        console.log('Bad old jsoc.json ! removed it first!'.red); process.exit(0);
-      }
-      for (let i in success) {
-        this.mergeRes(success[i], successOld[i]);
+    if (fs.existsSync(`${process.cwd()}/jsoc.json`)) {
+      let oldJsoc = require(`${process.cwd()}/jsoc.json`);
+      for (let k in this.apis) {
+        if (oldJsoc.apis[k] === undefined) {
+          continue;
+        }
+        let success = this.apis[k].response.body.success;
+        let successOld = null;
+        try {
+          successOld = oldJsoc.apis[k].response.body.success;
+        } catch (e) {
+          console.log('Bad old jsoc.json ! removed it first!'.red); process.exit(0);
+        }
+        for (let i in success) {
+          this.mergeRes(success[i], successOld[i]);
+        }
       }
     }
   }

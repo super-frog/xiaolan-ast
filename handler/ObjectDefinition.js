@@ -1,5 +1,6 @@
 /**
  * Created by lanhao on 2017/9/2.
+ * frog 项目的请求对象类编译
  */
 
 'use strict';
