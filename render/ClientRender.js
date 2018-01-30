@@ -64,14 +64,14 @@ class ClientRender extends BaseRender {
     headers['content-type'] = headers['content-type'] || 'application/json';
     let resp = request.reset()
       .method('${req.request.method}')
-      .url(this.host+'${url}')
+      .url(this.host + '${url}')
       .headers(headers)
       .query(query)
       .body(body)
       .send();
-    if(resp.statusCode===200){
-      return JSON.parse(resp.body);
-    }else{
+    if (resp.statusCode === 200) {
+      return (typeof resp.body === 'string') ? JSON.parse(resp.body) : resp.body;
+    } else {
       let err = new Error();
       err.statusCode = resp.statusCode;
       return err;

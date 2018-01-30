@@ -47,7 +47,7 @@ index.genHelper = (file) => {
 };
 
 index.genClient = (projectName, output, specJsoc) => {
-  return (new ClientRender(projectName, output, specJsoc));
+  return (new ClientRender(projectName, output, specJsoc)).make();
 };
 
 module.exports = index;

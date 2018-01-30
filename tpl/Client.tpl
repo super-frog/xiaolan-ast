@@ -9,7 +9,6 @@ class _name_ {
   }
 
   _method_
-
 }
 
 module.exports = _name_;
