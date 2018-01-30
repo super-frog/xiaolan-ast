@@ -1,13 +1,17 @@
 'use strict';
 const request = require('request-agent').init();
+const fs = require('fs');
 const BaseRender = require('./BaseRender');
 const templateBank = require('../tpl/templateBank');
 const EOL = require('os').EOL;
 
 class ClientRender extends BaseRender {
-  constructor(projectName, output, specJsoc) {
+  constructor(projectName, output) {
     super({});
-    this.url = specJsoc || `https://raw.githubusercontent.com/${projectName}/master/jsoc.json`;
+    if (fs.existsSync(projectName)) {
+
+    }
+    this.projectNameurl = projectName;
     this.ouputPath = output;
     this.output = [];
     this.data._method_ = [];
@@ -16,8 +20,15 @@ class ClientRender extends BaseRender {
   }
 
   async getJsoc() {
-    console.log(this.url);
-    let jsoc = await request.method('get').url(this.url).send();
+    let url = '';
+    if (fs.existsSync(this.projectName)) {
+      return require(this.projectName);
+    } else if (this.projectName.startsWith('http')) {
+      url = this.projectName;
+    } else {
+      url = `https://raw.githubusercontent.com/${projectName}/master/jsoc.json`;
+    }
+    let jsoc = await request.method('get').url(url).send();
     if (jsoc.statusCode === 200) {
       let body = JSON.parse(jsoc.body);
       if (body.code === 200) {
@@ -55,9 +66,9 @@ class ClientRender extends BaseRender {
   restFunc(req) {
     let args = 'headers = {}, query = {}, body = {}';
     let url = req.request.path;
-    for(let k in req.request.params){
-      args = `${k}, `+args;
-      url = url.replace(`{${k}}`,`'+${k}+'`);
+    for (let k in req.request.params) {
+      args = `${k}, ` + args;
+      url = url.replace(`{${k}}`, `'+${k}+'`);
     }
     let output = `//${req.desc}
   async ${req.name}(${args}){
