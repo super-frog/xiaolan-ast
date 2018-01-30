@@ -46,8 +46,8 @@ index.genHelper = (file) => {
   return HelperDefinition(path.resolve(file));
 };
 
-index.genClient = (projectName, output, specJsoc) => {
-  return (new ClientRender(projectName, output, specJsoc)).make();
+index.genClient = (projectName, output) => {
+  return (new ClientRender(projectName, output)).make();
 };
 
 module.exports = index;

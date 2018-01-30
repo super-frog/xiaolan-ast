@@ -8,26 +8,15 @@ const EOL = require('os').EOL;
 class ClientRender extends BaseRender {
   constructor(projectName, output) {
     super({});
-    if (fs.existsSync(projectName)) {
-
-    }
-    this.projectNameurl = projectName;
+    this.data._name_ = camel(projectName.replace('-', ''), true);
+    this.projectName = projectName;
     this.ouputPath = output;
     this.output = [];
     this.data._method_ = [];
-    this.data._name_ = camel(projectName.replace('-', ''), true);
-
   }
 
   async getJsoc() {
-    let url = '';
-    if (fs.existsSync(this.projectName)) {
-      return require(this.projectName);
-    } else if (this.projectName.startsWith('http')) {
-      url = this.projectName;
-    } else {
-      url = `https://raw.githubusercontent.com/${projectName}/master/jsoc.json`;
-    }
+    let url = `https://raw.githubusercontent.com/${this.projectName}/master/jsoc.json`;
     let jsoc = await request.method('get').url(url).send();
     if (jsoc.statusCode === 200) {
       let body = JSON.parse(jsoc.body);
