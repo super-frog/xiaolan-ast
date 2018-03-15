@@ -35,13 +35,28 @@ class JsocDriver {
     routes = this.routing(routes.map());
 
     for (let k in routes) {
-      let scope;
+      let scopes = [];
       let returns = [];
 
       for (let i in routes[k].handlers) {
         let handler = `${this.projectRoot}/handlers/${routes[k].handlers[i]}.js`;
-        scope = new Scope(routes[k].handlers[i], handler);
-        returns = returns.concat(this.fattenReturn(scope.ret));
+        scopes = scopes.concat(new Scope(routes[k].handlers[i], handler));
+        let _tmp = this.fattenReturn(scopes[scopes.length - 1].ret);
+        if (i < (routes[k].handlers.length - 1)) {
+          //去掉返回true的中间件
+          let filter = [];
+          for (let i in _tmp) {
+            if (_tmp[i].value === true) {
+              continue;
+            }
+            filter.push(_tmp[i]);
+          }
+          _tmp = filter;
+        }
+        if (_tmp.length) {
+          returns = returns.concat(_tmp);
+        }
+
       }
 
       let jsocResponse = {
@@ -51,6 +66,7 @@ class JsocDriver {
 
       for (let k in returns) {
         returns[k] = this.formatReturn(returns[k]);
+        
         if (returns[k].code === undefined) {
           returns[k] = {
             code: 200,
@@ -62,12 +78,14 @@ class JsocDriver {
           jsocResponse.failed.push(returns[k]);
         }
       }
+      let request = this.jsocRequest(scopes, routes[k]);
 
-      this.apis[scope.name] = {
-        name: scope.name,
-        desc: scope.desc,
+      let finalScope = scopes[scopes.length - 1];
+      this.apis[finalScope.name] = {
+        name: finalScope.name,
+        desc: finalScope.desc,
         group: '',
-        request: this.jsocRequest(scope, routes[k]),
+        request,
         response: {
           body: jsocResponse
         }
@@ -100,57 +118,64 @@ class JsocDriver {
     return result;
   }
 
-  jsocRequest(scope, route) {
-    let astObjects = scope.astObjects();
+  jsocRequest(scopes, route) {
     let result = {};
     result.method = route.method;
     result.path = route.path;
     result.query = {};
     result.params = {};
     result.body = {};
-    let requestObj = null;
-    for (let k in scope.def) {
-      if (scope.def[k] && scope.def[k].exports === true) {
-        requestObj = scope.def[k].args;
-        break;
+
+    let scopeNum = scopes.length;
+    for (let i = 0; i < scopeNum; i++) {
+
+      let scope = scopes[i];
+      let astObjects = scope.astObjects();
+
+
+      let requestObj = null;
+      for (let k in scope.def) {
+        if (scope.def[k] && scope.def[k].exports === true) {
+          requestObj = scope.def[k].args;
+          break;
+        }
+      }
+
+      for (let k in requestObj) {
+        let objectDefinition = astObjects[requestObj[k]] || null;
+        if (objectDefinition === null) {
+          continue;
+        }
+        for (let i in objectDefinition.props) {
+          let ins = objectDefinition.props[i].definition.in.split('.');
+
+          let _node = result;
+          while (ins.length > 0) {
+            let _k = ins.shift();
+            _node[_k] = _node[_k] || {};
+            _node = _node[_k];
+          }
+          if (objectDefinition.props[i].definition.key) {
+            _node[objectDefinition.props[i].definition.key] = _node[objectDefinition.props[i].definition.key] || {};
+            _node = _node[objectDefinition.props[i].definition.key];
+          } else {
+            _node[i] = _node[i] || {};
+            _node = _node[i];
+          }
+
+          _node._type = objectDefinition.props[i].definition.type.name;
+          _node._default = objectDefinition.props[i].definition.defaultValue;
+          _node._desc = [objectDefinition.props[i].definition.comment, objectDefinition.props[i].definition.description].join(' ');
+
+          if (objectDefinition.props[i].definition.type.length) {
+            _node._length = objectDefinition.props[i].definition.type.length;
+          }
+          if (objectDefinition.props[i].definition.type.range) {
+            _node._range = objectDefinition.props[i].definition.type.range;
+          }
+        }
       }
     }
-
-    for (let k in requestObj) {
-      let objectDefinition = astObjects[requestObj[k]] || null;
-      if (objectDefinition === null) {
-        continue;
-      }
-      for (let i in objectDefinition.props) {
-        let ins = objectDefinition.props[i].definition.in.split('.');
-
-        let _node = result;
-        while (ins.length > 0) {
-          let _k = ins.shift();
-          _node[_k] = _node[_k] || {};
-          _node = _node[_k];
-        }
-        if (objectDefinition.props[i].definition.key) {
-          _node[objectDefinition.props[i].definition.key] = _node[objectDefinition.props[i].definition.key] || {};
-          _node = _node[objectDefinition.props[i].definition.key];
-        } else {
-          _node[i] = _node[i] || {};
-          _node = _node[i];
-        }
-
-        _node._type = objectDefinition.props[i].definition.type.name;
-        _node._default = objectDefinition.props[i].definition.defaultValue;
-        _node._desc = [objectDefinition.props[i].definition.comment, objectDefinition.props[i].definition.description].join(' ');
-
-        if (objectDefinition.props[i].definition.type.length) {
-          _node._length = objectDefinition.props[i].definition.type.length;
-        }
-        if (objectDefinition.props[i].definition.type.range) {
-          _node._range = objectDefinition.props[i].definition.type.range;
-        }
-      }
-    }
-
     return result;
   }
 
@@ -228,9 +253,10 @@ class JsocDriver {
 
         break;
       case 'unknown':
+      case 'NOT_SURE':
         result = this.errors[ret.value];
         if (result) {
-          result.message = (result.message || '') + ret.msg || '';
+          result.message = (result.message || '') + (ret.msg || '');
         } else {
           result = (new XiaolanError({
             code: -1,

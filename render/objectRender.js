@@ -7,8 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const EOL = require('os').EOL;
 const templateBank = require('../tpl/templateBank');
-const py = require('frog-lib').pinyin;
-
+const py = require('../lib/pinyin');
 const BaseRender = require('./BaseRender');
 
 class ObjectRender extends BaseRender {
@@ -60,7 +59,7 @@ class ObjectRender extends BaseRender {
   }
 
   pickFunc() {
-    return `static pick(source, path, type=null, defaultValue=null){
+    return `static pick(source, path, type=null, defaultValue=null, memberType=null){
     let paths = path.split('.');
     let tmp = source;
     for(let k in paths){
@@ -76,7 +75,6 @@ class ObjectRender extends BaseRender {
     }
     switch (type){
       case 'string':
-      case 'enum':
         if(typeof tmp === 'object'){
           tmp = JSON.stringify(tmp);
         }else{
@@ -84,7 +82,19 @@ class ObjectRender extends BaseRender {
         }
         break;
       case 'number':
+      case 'enum':
         tmp = 1*tmp;
+        break;
+      case 'array':
+        if(typeof tmp === 'string'){
+          tmp = tmp.split(',');
+        }
+        if (memberType === 'number') {
+          let len = tmp.length;
+          for (let i = 0; i < len; i++) {
+            tmp[i] = 1 * tmp[i];
+          }
+        }
         break;
     }
     return (defaultValue && (undefined===tmp)) ? defaultValue: tmp;
@@ -197,7 +207,8 @@ class ObjectRender extends BaseRender {
       throw new Error("Requirement : [${props[k].definition.key || props[k].name}]");
     }${EOL}`;
       }
-      output += `    options.${props[k].name} = this.pick(req, '${props[k].definition.in}.${props[k].definition.key || props[k].name}', '${props[k].definition.type.name}', ${this.getDefaultValue(props[k].definition)});${EOL}`;
+      console.log(props[k].definition.type);
+      output += `    options.${props[k].name} = this.pick(req, '${props[k].definition.in}.${props[k].definition.key || props[k].name}', '${props[k].definition.type.name}', ${this.getDefaultValue(props[k].definition)}${(props[k].definition.type.name==='array'?', \''+props[k].definition.type.member.name+'\'':'')});${EOL}`;
 
     }
     output += `    return new ${className}(options);${EOL}`;

@@ -198,16 +198,6 @@ fresh@0.5.2:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.5.2.tgz#3d8cadd90d976569fa835ab1f8e4b23a105605a7"
 
-frog-lib@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/frog-lib/-/frog-lib-1.0.3.tgz#e11cd5df6f4986a5de513daa53b65c4a8737a596"
-  dependencies:
-    colors "^1.1.2"
-    fy-mysql "^0.2.13"
-    ini "^1.3.4"
-    lan_crypto "^1.0.5"
-    node-pinyin "^0.2.3"
-
 fy-mysql@^0.2.13:
   version "0.2.13"
   resolved "https://registry.yarnpkg.com/fy-mysql/-/fy-mysql-0.2.13.tgz#0b53e8017a232078c124a89f7e76ad569d0ab9f3"
@@ -266,10 +256,6 @@ inherits@2.0.3, inherits@~2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
 
-ini@^1.3.4:
-  version "1.3.4"
-  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.4.tgz#0537cb79daf59b59a1a517dff706c86ec039162e"
-
 is-typedarray@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-typedarray/-/is-typedarray-1.0.0.tgz#e479c80858df0c1b11ddda6940f96011fcda4a9a"
@@ -311,12 +297,6 @@ keypress@0.1.x:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/keypress/-/keypress-0.1.0.tgz#4a3188d4291b66b4f65edb99f806aa9ae293592a"
 
-lan_crypto@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/lan_crypto/-/lan_crypto-1.0.5.tgz#e32ff4a64a81cfa8e69891bbe554a2ba131bfb3d"
-  dependencies:
-    crypto "0.0.3"
-
 lodash@^4.14.0:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
@@ -356,7 +336,7 @@ mysql@^2.10.2:
 
 node-pinyin@^0.2.3:
   version "0.2.3"
-  resolved "https://registry.yarnpkg.com/node-pinyin/-/node-pinyin-0.2.3.tgz#5063797bd0a006c1a736cee987535636a549bd9e"
+  resolved "https://registry.npmjs.org/node-pinyin/-/node-pinyin-0.2.3.tgz#5063797bd0a006c1a736cee987535636a549bd9e"
   dependencies:
     commander "~1.1.1"
 
@@ -567,6 +547,12 @@ verror@1.10.0:
     assert-plus "^1.0.0"
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
+
+xiaolan-db@^1.2.13:
+  version "1.2.13"
+  resolved "https://registry.npmjs.org/xiaolan-db/-/xiaolan-db-1.2.13.tgz#2986e518b4a07f2094c0f335cc8af8550076e01c"
+  dependencies:
+    fy-mysql "^0.2.13"
 
 xiaolan-db@^1.2.9:
   version "1.2.9"

@@ -6,7 +6,7 @@
 const BaseRender = require('./BaseRender');
 const templateBank = require('../tpl/templateBank');
 const EOL = require('os').EOL;
-const py = require('frog-lib').pinyin;
+const py = require('../lib/pinyin');
 
 class ModelRender extends BaseRender {
   constructor(definition, output) {
@@ -232,7 +232,12 @@ class ModelRender extends BaseRender {
       }else{
         throw new Error('Not Allow Fetching By [ "'+k+'" ]');
       }
-      sql += ' and \`'+field+'\`=:'+k+'';
+      if (Array.isArray(data[k]) && data[k].length) {
+        sql += ' and \`'+field+'\` in ("'+data[k].join('","')+'")';
+      } else {
+        sql += ' and \`'+field+'\`=:'+k+'';
+      }
+      
     }
     sql += ' order by \`${this.definition.primary.fieldName}\` desc limit '+((page-1)*pageSize)+','+pageSize;
     //@list
