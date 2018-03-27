@@ -66,7 +66,7 @@ class JsocDriver {
 
       for (let k in returns) {
         returns[k] = this.formatReturn(returns[k]);
-        
+
         if (returns[k].code === undefined) {
           returns[k] = {
             code: 200,
@@ -132,7 +132,6 @@ class JsocDriver {
       let scope = scopes[i];
       let astObjects = scope.astObjects();
 
-
       let requestObj = null;
       for (let k in scope.def) {
         if (scope.def[k] && scope.def[k].exports === true) {
@@ -166,12 +165,36 @@ class JsocDriver {
           _node._type = objectDefinition.props[i].definition.type.name;
           _node._default = objectDefinition.props[i].definition.defaultValue;
           _node._desc = [objectDefinition.props[i].definition.comment, objectDefinition.props[i].definition.description].join(' ');
-
+          if (_node._type === 'enum') {
+            _node._options = objectDefinition.props[i].definition.type.options;
+          }
           if (objectDefinition.props[i].definition.type.length) {
             _node._length = objectDefinition.props[i].definition.type.length;
           }
           if (objectDefinition.props[i].definition.type.range) {
             _node._range = objectDefinition.props[i].definition.type.range;
+          }
+          if (objectDefinition.props[i].definition.type.member) {
+
+            if (objectDefinition.props[i].definition.type.member.range) {
+              _node._array_length = objectDefinition.props[i].definition.type.member.range;
+            }
+            if (objectDefinition.props[i].definition.type.member.length) {
+              _node._array_length = objectDefinition.props[i].definition.type.member.length;
+            }
+
+            if (objectDefinition.props[i].definition.type.member.memberRange) {
+              _node._member_range = objectDefinition.props[i].definition.type.member.memberRange;
+              _node._member_type = 'number';
+            }
+            if (objectDefinition.props[i].definition.type.member.memberLength) {
+              _node._member_length = objectDefinition.props[i].definition.type.member.memberLength;
+              _node._member_type = 'string';
+            }
+            if (objectDefinition.props[i].definition.type.member.options) {
+              _node._member_options = objectDefinition.props[i].definition.type.member.options;
+              _node._member_type = 'enum';
+            }
           }
         }
       }
