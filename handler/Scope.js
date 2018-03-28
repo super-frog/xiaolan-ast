@@ -31,9 +31,7 @@ class Scope {
       ast = file;
       this.dir = '';
     }
-    // if (name == 'Arrow1') {
-    //   console.log(JSON.stringify(ast)); process.exit(0);
-    // }
+
     this.desc = this.getDesc(ast) || name;
 
     this.def = {};
@@ -227,7 +225,7 @@ class Scope {
 
   //专门处理返回语句
   returnStatement(stat) {
-    if (stat.leadingComments && stat.leadingComments[0] && ['@row', '@list', '@true', '@this','@number'].includes(stat.leadingComments[0].value)) {
+    if (stat.leadingComments && stat.leadingComments[0] && ['@row', '@list', '@true', '@this', '@number'].includes(stat.leadingComments[0].value)) {
       if (stat.leadingComments[0].value === '@row') {
         return this.getClassRet(this.parent);
       } else if (stat.leadingComments[0].value === '@list') {
@@ -240,12 +238,12 @@ class Scope {
           type: 'Literal',
           value: true
         };
-      }else if(stat.leadingComments[0].value === '@number'){
+      } else if (stat.leadingComments[0].value === '@number') {
         return {
           type: 'number',
           value: 10,
         };
-      }else if (stat.leadingComments[0].value === '@this') {
+      } else if (stat.leadingComments[0].value === '@this') {
         return this.parent.parent.name;
       }
     }
@@ -303,8 +301,17 @@ class Scope {
         for (let k in stat.argument.properties) {
           obj.value[stat.argument.properties[k].key.name] = {
             name: stat.argument.properties[k].key.name,
-            type: typeof stat.argument.properties[k].value.value
+            type: stat.argument.properties[k].value.value ?
+              stat.argument.properties[k].value.type
+              : undefined,
+              value:{
+                value: stat.argument.properties[k].value.value,
+                type: typeof stat.argument.properties[k].value.value,
+              }
           };
+          if (stat.argument.properties[k].value.type === 'Identifier') {
+            obj.value[stat.argument.properties[k].key.name] = this.getDefStruct(this.getIdentifierDef(stat.argument.properties[k].value.name));
+          }
         }
         return obj;
         break;
@@ -557,13 +564,13 @@ class Scope {
     let result = {};
     for (let k in props) {
       result[props[k].key.name] = {
-        type:'Literal',
-        value:{
+        type: 'Literal',
+        value: {
           type: this.getMemberExpressionType(props[k].value),
           value: props[k].value.value,
         }
       };
-     
+
     }
 
     return result;
@@ -572,18 +579,18 @@ class Scope {
   getMemberExpressionType(expression) {
     switch (expression.type) {
       case 'MemberExpression':
-        if(expression.object&&this.def['@'+expression.object.name] && this.def['@'+expression.object.name].type === 'object'){
-          if(this.def['@'+expression.object.name].value && this.def['@'+expression.object.name].value[expression.property.name]){
-            return this.def['@'+expression.object.name].value[expression.property.name].value.type;
-          }else{
-            return 'NOT_SURE';  
+        if (expression.object && this.def['@' + expression.object.name] && this.def['@' + expression.object.name].type === 'object') {
+          if (this.def['@' + expression.object.name].value && this.def['@' + expression.object.name].value[expression.property.name]) {
+            return this.def['@' + expression.object.name].value[expression.property.name].value.type;
+          } else {
+            return 'NOT_SURE';
           }
-        }else{
+        } else {
           return 'NOT_SURE';
         }
         break;
       default:
-        return expression.value?typeof expression.value:'NOT_SURE';
+        return expression.value ? typeof expression.value : 'NOT_SURE';
         break;
     }
 

@@ -73,11 +73,13 @@ class JsocDriver {
             data: returns[k],
             message: ''
           };
+
           jsocResponse.success.push(this.jsocResponse(returns[k]));
         } else {
           jsocResponse.failed.push(returns[k]);
         }
       }
+      
       let request = this.jsocRequest(scopes, routes[k]);
 
       let finalScope = scopes[scopes.length - 1];
@@ -208,9 +210,11 @@ class JsocDriver {
       _type: typeof ret.code,
       _assert: ret.code,
     };
+
     if (Array.isArray(ret.data)) {
       result.data = [];
       if (ret.data.length) {
+
         let tmp = {};
         for (let k in ret.data[0]) {
           tmp[k] = {
@@ -223,9 +227,18 @@ class JsocDriver {
     } else if (typeof ret.data === 'object' && ret.data !== null) {
       result.data = {};
       for (let k in ret.data) {
-        result.data[k] = {
-          _type: ret.data[k]
-        };
+        if (Array.isArray(ret.data[k])) {
+          result.data[k] = [];
+          let tmp = {};
+          for(let i in ret.data[k][0]){
+            tmp[i] = ret.data[k][0][i];
+          }
+          result.data[k].push(tmp);
+        } else {
+          result.data[k] = {
+            _type: ret.data[k]
+          };
+        }
       }
     } else {
       result.data = {
@@ -291,7 +304,11 @@ class JsocDriver {
         break;
       case 'object':
         for (let k in ret.value) {
-          result[k] = (ret.value[k] && ret.value[k].value) ? ret.value[k].value.type : 'NOT_SURE';
+          if (ret.value[k].type === 'array') {
+            result[k] = this.formatReturn(ret.value[k]);
+          } else {
+            result[k] = ((ret.value[k] && ret.value[k].value) ? ret.value[k].value.type : 'NOT_SURE');
+          }
         }
         break;
       case 'array':

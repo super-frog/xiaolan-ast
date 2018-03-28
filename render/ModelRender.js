@@ -19,7 +19,7 @@ class ModelRender extends BaseRender {
     this.data._init_ = this.classConstructorBody();
     this.data._validate_ = '';
     this.data._method_ = [];
-    
+
     this.data._method_ = this.searchFunc();
     this.data._method_.push(this.tableName());
     this.data._method_.push(this.count());
@@ -47,7 +47,7 @@ class ModelRender extends BaseRender {
     }
   }
 
-  tableName(){
+  tableName() {
     let output = [];
     output.push(`static table(){
     return TableName;
@@ -56,7 +56,7 @@ class ModelRender extends BaseRender {
     return output;
   }
 
-  count(){
+  count() {
     let output = [];
     let countFunc = `static count(expression,where){
     let sql = 'select count('+expression+') from \`${this.definition.name}\` ';
@@ -100,7 +100,7 @@ class ModelRender extends BaseRender {
     return output;
   }
 
-  getDefaultValue(fieldDefinition){
+  getDefaultValue(fieldDefinition) {
     let type = fieldDefinition.rules[0];
     switch (type) {
       case 'string':
@@ -258,7 +258,7 @@ class ModelRender extends BaseRender {
     fetchByAttr += `}${EOL}`;
     output.push(fetchByAttr);
 
-    let raw = `static raw(sql='',params={}){
+    let raw = `static raw(sql='',params={}, obj=true){
     if(!sql.includes('limit')){
       throw new Error('raw sql must with paging');
     }
@@ -268,11 +268,15 @@ class ModelRender extends BaseRender {
         if(e){
           rejected(e);
         }else{
-          let result = [];
-          for(let k in r) {
-            result.push(new ${this.data._name_}(r[k]));
+          if (obj) {
+            let result = [];
+            for(let k in r) {
+              result.push(new ${this.data._name_}(r[k]));
+            }
+            resolved(result);
+          }else{
+            resolved(r);
           }
-          resolved(result);
         }
       });
     });
@@ -362,15 +366,15 @@ class ModelRender extends BaseRender {
     output += `      let data = this.data();${EOL}`;
     output += `      data.createTime = data.createTime||Number.parseInt(Date.now()/1000);${EOL}`;
     output += `      data.updateTime = data.updateTime||Number.parseInt(Date.now()/1000);${EOL}`;
-    output += '      let sql = `insert into \\\`${TableName}\\\` set `;'+EOL;
+    output += '      let sql = `insert into \\\`${TableName}\\\` set `;' + EOL;
     output += `      let fields = [];${EOL}`;
     output += `      for(let k in data){${EOL}`;
-    if(this.definition.primary) {
+    if (this.definition.primary) {
       output += `        if(k==='${this.definition.primary.key}' || data[k]===null){${EOL}`;
       output += `          continue;${EOL}`;
       output += `        }${EOL}`;
     }
-    output += '        fields.push(`\\\`${KeyMap[k]}\\\`=:${k}`);'+EOL;
+    output += '        fields.push(`\\\`${KeyMap[k]}\\\`=:${k}`);' + EOL;
     output += `      }${EOL}`;
     output += `      sql += fields.join(',');${EOL}`;
 
@@ -396,17 +400,17 @@ class ModelRender extends BaseRender {
     output += `    }${EOL}`;
     output += `    //@true${EOL}`;
     output += `    return new Promise((resolved, rejected) => {${EOL}`;
-    output += '      let sql = `update \\\`${TableName}\\\` set `;'+EOL;
+    output += '      let sql = `update \\\`${TableName}\\\` set `;' + EOL;
     output += `      let data = this.data();${EOL}`;
     output += `      data.updateTime = data.updateTime||Number.parseInt(Date.now()/1000);${EOL}`;
     output += `      let fields = [];${EOL}`;
     output += `      for(let k in data){${EOL}`;
-    if(this.definition.primary) {
+    if (this.definition.primary) {
       output += `        if(k==='${this.definition.primary.key}' || data[k]===null){${EOL}`;
       output += `          continue;${EOL}`;
       output += `        }${EOL}`;
     }
-    output += '        fields.push(`\\\`${KeyMap[k]}\\\`=:${k}`);'+EOL;
+    output += '        fields.push(`\\\`${KeyMap[k]}\\\`=:${k}`);' + EOL;
     output += `      }${EOL}`;
     output += `      sql += fields.join(',');${EOL}`;
 
