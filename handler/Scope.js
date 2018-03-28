@@ -31,6 +31,9 @@ class Scope {
       ast = file;
       this.dir = '';
     }
+    // if (name == 'Arrow1') {
+    //   console.log(JSON.stringify(ast)); process.exit(0);
+    // }
 
     this.desc = this.getDesc(ast) || name;
 
@@ -304,10 +307,10 @@ class Scope {
             type: stat.argument.properties[k].value.value ?
               stat.argument.properties[k].value.type
               : undefined,
-              value:{
-                value: stat.argument.properties[k].value.value,
-                type: typeof stat.argument.properties[k].value.value,
-              }
+            value: {
+              value: stat.argument.properties[k].value.value,
+              type: typeof stat.argument.properties[k].value.value,
+            }
           };
           if (stat.argument.properties[k].value.type === 'Identifier') {
             obj.value[stat.argument.properties[k].key.name] = this.getDefStruct(this.getIdentifierDef(stat.argument.properties[k].value.name));
@@ -502,6 +505,13 @@ class Scope {
           type: 'object',
           value: result
         };
+        break;
+      case 'MemberExpression':
+        if (right.object.name && right.property.name) {
+          let def = this.def['@' + right.object.name];
+          return def.value[right.property.name];
+        }
+        return result;
         break;
     }
   }
