@@ -1,4 +1,3 @@
-'use strict';
 const request = require('request-agent').init();
 const fs = require('fs');
 const BaseRender = require('./BaseRender');

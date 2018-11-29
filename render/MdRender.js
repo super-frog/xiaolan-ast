@@ -1,8 +1,4 @@
-'use strict';
-
 const BaseRender = require('./BaseRender');
-
-const EOL = require('os').EOL;
 
 class MdRender extends BaseRender {
     constructor(jsoc, output){

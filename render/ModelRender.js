@@ -1,11 +1,6 @@
-/**
- * Created by lanhao on 2017/9/17.
- */
-
-'use strict';
 const BaseRender = require('./BaseRender');
 const templateBank = require('../tpl/templateBank');
-const EOL = require('os').EOL;
+const { EOL } = require('os');
 const py = require('../lib/pinyin');
 
 class ModelRender extends BaseRender {
@@ -32,7 +27,7 @@ class ModelRender extends BaseRender {
 
     this.data._depends_ = new Set();
     this.data._depends_.add(`const Connection = require('xiaolan-db').Connection('default').conn;`);
-    this.data._depends_.add(`const TableName = "${this.definition.name}";`);
+    this.data._depends_.add(`const TableName = '${this.definition.name}';`);
     this.data._depends_ = Array.from(this.data._depends_);
     let tpl = templateBank('ModelClass').split(EOL);
     for (let k in tpl) {

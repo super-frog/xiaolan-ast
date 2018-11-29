@@ -1,11 +1,6 @@
-/**
- * Created by lanhao on 2017/9/4.
- */
-
-'use strict';
 const fs = require('fs');
 const path = require('path');
-const EOL = require('os').EOL;
+const { EOL } = require('os');
 const templateBank = require('../tpl/templateBank');
 const py = require('../lib/pinyin');
 const BaseRender = require('./BaseRender');
@@ -53,7 +48,7 @@ class ObjectRender extends BaseRender {
   }
 
   listEnum(enumSet) {
-    let content = `module.exports = ${JSON.stringify(enumSet, null, 2)};`
+    let content = `module.exports = ${JSON.stringify(enumSet, null, 2).replace(/"/g,`'`)};`
     fs.writeFileSync(`${path.resolve(this.ouputPath)}/Enum.js`, content);
     console.log('File generated in : ' + `${path.resolve(this.ouputPath)}/Enum.js`);
   }
@@ -74,28 +69,28 @@ class ObjectRender extends BaseRender {
       return defaultValue;
     }
     switch (type){
-      case 'string':
-        if(typeof tmp === 'object'){
-          tmp = JSON.stringify(tmp);
-        }else{
-          tmp = decodeURIComponent(tmp.toString());
+    case 'string':
+      if(typeof tmp === 'object'){
+        tmp = JSON.stringify(tmp);
+      }else{
+        tmp = decodeURIComponent(tmp.toString());
+      }
+      break;
+    case 'number':
+    case 'enum':
+      tmp = 1*tmp;
+      break;
+    case 'array':
+      if(typeof tmp === 'string'){
+        tmp = tmp.split(',');
+      }
+      if (memberType === 'number') {
+        let len = tmp.length;
+        for (let i = 0; i < len; i++) {
+          tmp[i] = 1 * tmp[i];
         }
-        break;
-      case 'number':
-      case 'enum':
-        tmp = 1*tmp;
-        break;
-      case 'array':
-        if(typeof tmp === 'string'){
-          tmp = tmp.split(',');
-        }
-        if (memberType === 'number') {
-          let len = tmp.length;
-          for (let i = 0; i < len; i++) {
-            tmp[i] = 1 * tmp[i];
-          }
-        }
-        break;
+      }
+      break;
     }
     return (defaultValue && (undefined===tmp)) ? defaultValue: tmp;
   }`;
@@ -237,7 +232,7 @@ class ObjectRender extends BaseRender {
       }
       if (props[k].definition.requirement === true) {
         output += `    if(!this.pick(req, '${props[k].definition.in}.${props[k].definition.key || props[k].name}')){
-      throw new Error("Requirement : [${props[k].definition.key || props[k].name}]");
+      throw new Error('Requirement : [${props[k].definition.key || props[k].name}]');
     }${EOL}`;
       }
 

@@ -1,9 +1,3 @@
-/**
- * Created by lanhao on 2017/9/6.
- */
-
-'use strict';
-
 const fs = require('fs');
 const EOL = require('os').EOL;
 const path = require('path');

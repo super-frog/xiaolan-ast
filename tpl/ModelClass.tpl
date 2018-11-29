@@ -1,4 +1,3 @@
-"use strict";
 _depends_
 
 class _name_ {

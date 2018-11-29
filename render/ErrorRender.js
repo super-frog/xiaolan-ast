@@ -1,9 +1,3 @@
-/**
- * Created by lanhao on 2017/9/6.
- */
-
-'use strict';
-
 const BaseRender = require('./BaseRender');
 const templateBank = require('../tpl/templateBank');
 const EOL = require('os').EOL;
