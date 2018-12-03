@@ -137,7 +137,7 @@ class ObjectRender extends BaseRender {
 
   enumFunc(field, enumSet) {
     return `get${py.camel(field, true)}(){
-    return (${JSON.stringify(enumSet.options)})[this.${field}];
+    return (${JSON.stringify(enumSet.options).replace(/"/g,'\'')})[this.${field}];
   }${EOL}`;
   }
 
@@ -161,7 +161,7 @@ class ObjectRender extends BaseRender {
             output += `    }${EOL}${EOL}`;
             break;
           case 'enum':
-            output += `    if((${JSON.stringify(props[k].definition.type.options)})[this.${props[k].name}] === undefined){${EOL}`;
+            output += `    if((${JSON.stringify(props[k].definition.type.options).replace(/"/g,'\'')})[this.${props[k].name}] === undefined){${EOL}`;
             output += `      throw new Error('type validate failed: [${props[k].name}]: ${props[k].name} can only choosing from ["${this.arrayDisplay(props[k].definition.type.options)}"]');${EOL}`;
             output += `    }${EOL}${EOL}`;
             break;

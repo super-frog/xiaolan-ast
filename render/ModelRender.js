@@ -412,7 +412,7 @@ class ModelRender extends BaseRender {
 
 
     let primary = this.definition.primary.fieldName;
-    output += '      sql += ` where \\\`' + primary + '\\\`=:' + this.definition.primary.key + '`;' + EOL;
+    output += '      sql += \' where \`' + primary + '\`=:' + this.definition.primary.key + '\';' + EOL;
     output += `      Connection.query({sql: sql,params:data},(e, r) => {${EOL}`;
     output += `        if(e) {${EOL}`;
     output += `          rejected(e);${EOL}`;
