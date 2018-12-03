@@ -108,13 +108,13 @@ class JsocDriver {
         continue;
       }
       switch (ret[k].type) {
-        case 'func':
-          result = result.concat(this.fattenReturn(ret[k].scope.ret));
-          break;
+      case 'func':
+        result = result.concat(this.fattenReturn(ret[k].scope.ret));
+        break;
 
-        default:
-          result.push(ret[k]);
-          break;
+      default:
+        result.push(ret[k]);
+        break;
       }
     }
     return result;
@@ -285,44 +285,44 @@ class JsocDriver {
   formatReturn(ret) {
     let result = {};
     switch (ret.type) {
-      case 'func':
+    case 'func':
 
-        break;
-      case 'unknown':
-      case 'NOT_SURE':
-        result = this.errors[ret.value];
-        if (result) {
-          result.message = (result.message || '') + (ret.msg || '');
+      break;
+    case 'unknown':
+    case 'NOT_SURE':
+      result = this.errors[ret.value];
+      if (result) {
+        result.message = (result.message || '') + (ret.msg || '');
+      } else {
+        result = (new XiaolanError({
+          code: -1,
+          httpStatus: 500,
+          message: 'Internal Error: not defined',
+          name: 'INTERNAL_ERROR',
+        })).obj();
+      }
+      break;
+    case 'object':
+      for (let k in ret.value) {
+        if (ret.value[k].type === 'array') {
+          result[k] = this.formatReturn(ret.value[k]);
         } else {
-          result = (new XiaolanError({
-            code: -1,
-            httpStatus: 500,
-            message: 'Internal Error: not defined',
-            name: 'INTERNAL_ERROR',
-          })).obj();
+          result[k] = ((ret.value[k] && ret.value[k].value) ? ret.value[k].value.type : 'NOT_SURE');
         }
-        break;
-      case 'object':
-        for (let k in ret.value) {
-          if (ret.value[k].type === 'array') {
-            result[k] = this.formatReturn(ret.value[k]);
-          } else {
-            result[k] = ((ret.value[k] && ret.value[k].value) ? ret.value[k].value.type : 'NOT_SURE');
-          }
-        }
-        break;
-      case 'array':
-        result = [this.formatReturn(ret.value)];
-        break;
-      case 'Literal':
-        result = ret.value;
-        break;
-      case 'module':
-        result = this.formatReturn(ret.scope);
-        break;
-      case 'class':
-        result = this.formatReturn(ret.scope.ret);
-        break;
+      }
+      break;
+    case 'array':
+      result = [this.formatReturn(ret.value)];
+      break;
+    case 'Literal':
+      result = ret.value;
+      break;
+    case 'module':
+      result = this.formatReturn(ret.scope);
+      break;
+    case 'class':
+      result = this.formatReturn(ret.scope.ret);
+      break;
     }
     return result;
   }

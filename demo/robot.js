@@ -12,9 +12,7 @@ const Robot = {
 };
 
 const hd = (Robot) => {
-  if(1){
-    return error.COMMON_ERROR;
-  }
+  
   return [Robot];
 };
 

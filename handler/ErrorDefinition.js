@@ -1,9 +1,4 @@
-/**
- * Created by lanhao on 2017/9/6.
- * frog的项目的错误定义编译
- */
 
-'use strict';
 const esprima = require('esprima');
 const fs = require('fs');
 const render = require('../render/ErrorRender');
@@ -20,7 +15,7 @@ module.exports = (file, output) => {
     });
   } catch (e) {
     throw new Error(file, e.message);
-    return;
+    
   }
 
   let definitions = [];

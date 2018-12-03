@@ -18,5 +18,7 @@
     "xiaolan-db": "^1.2.13",
     "xiaolan-router": "^1.0.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "eslint": "^5.9.0"
+  }
 }

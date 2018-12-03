@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 
 
@@ -46,17 +46,17 @@ class Robot {
       return defaultValue;
     }
     switch (type){
-      case 'string':
-      case 'enum':
-        if(typeof tmp === 'object'){
-          tmp = JSON.stringify(tmp);
-        }else{
-          tmp = tmp.toString();
-        }
-        break;
-      case 'number':
-        tmp = 1*tmp;
-        break;
+    case 'string':
+    case 'enum':
+      if(typeof tmp === 'object'){
+        tmp = JSON.stringify(tmp);
+      }else{
+        tmp = tmp.toString();
+      }
+      break;
+    case 'number':
+      tmp = 1*tmp;
+      break;
     }
     return (defaultValue && (undefined===tmp)) ? defaultValue: tmp;
   }

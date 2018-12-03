@@ -26,7 +26,7 @@ class ModelRender extends BaseRender {
     this.data._method_.push(this.create());
 
     this.data._depends_ = new Set();
-    this.data._depends_.add(`const Connection = require('xiaolan-db').Connection('default').conn;`);
+    this.data._depends_.add('const Connection = require(\'xiaolan-db\').Connection(\'default\').conn;');
     this.data._depends_.add(`const TableName = '${this.definition.name}';`);
     this.data._depends_ = Array.from(this.data._depends_);
     let tpl = templateBank('ModelClass').split(EOL);
@@ -98,22 +98,17 @@ class ModelRender extends BaseRender {
   getDefaultValue(fieldDefinition) {
     let type = fieldDefinition.rules[0];
     switch (type) {
-      case 'string':
-        return `'${fieldDefinition.defaultValue || ''}'`;
-        break;
-      case 'enum':
-      case 'number':
-        return `${fieldDefinition.defaultValue || 0}`;
-        break;
-      case 'array':
-        return `['${fieldDefinition.defaultValue.join('\',\'')}']`;
-        break;
-      case 'ref':
-        return `new ${fieldDefinition.type.ref.name}({})`;
-        break;
-      default:
-        return `''`;
-        break;
+    case 'string':
+      return `'${fieldDefinition.defaultValue || ''}'`;
+    case 'enum':
+    case 'number':
+      return `${fieldDefinition.defaultValue || 0}`;
+    case 'array':
+      return `['${fieldDefinition.defaultValue.join('\',\'')}']`;
+    case 'ref':
+      return `new ${fieldDefinition.type.ref.name}({})`;
+    default:
+      return '\'\'';
     }
   }
 
@@ -143,7 +138,7 @@ class ModelRender extends BaseRender {
     }
     if (Object.keys(this.definition.index).length) {
       for (let k in this.definition.index) {
-        let func = `static fetchBy`;
+        let func = 'static fetchBy';
         let args = [];
         let where = [];
         let params = [];
@@ -154,8 +149,8 @@ class ModelRender extends BaseRender {
           where.push(`\`${this.definition.index[k][i].fieldName}\`=:${this.definition.index[k][i].key}`);
           params.push(`${this.definition.index[k][i].key}: ${this.definition.index[k][i].key}`);
         }
-        args.push(`page=1`);
-        args.push(`pageSize=10`);
+        args.push('page=1');
+        args.push('pageSize=10');
         func += `(${args.join(', ')}){${EOL}`;
         func += `    let sql = 'select * from \`${this.definition.name}\` where ${where.join(' and ')} order by \`${this.definition.primary.fieldName}\` desc limit \'+((page-1)*pageSize)+\',\'+pageSize+\'';${EOL}`;
         func += `    //@list${EOL}`;
@@ -173,12 +168,12 @@ class ModelRender extends BaseRender {
       });
     });${EOL}`;
         func += `  }${EOL}`;
-        output.push(func)
+        output.push(func);
       }
     }
     if (Object.keys(this.definition.uniq).length) {
       for (let k in this.definition.uniq) {
-        let func = `static fetchBy`;
+        let func = 'static fetchBy';
         let args = [];
         let where = [];
         let params = [];
@@ -189,8 +184,8 @@ class ModelRender extends BaseRender {
           where.push(`\`${this.definition.uniq[k][i].fieldName}\`=:${this.definition.uniq[k][i].key}`);
           params.push(`${this.definition.uniq[k][i].key}: ${this.definition.uniq[k][i].key}`);
         }
-        args.push(`page=1`);
-        args.push(`pageSize=10`);
+        args.push('page=1');
+        args.push('pageSize=10');
         func += `(${args.join(', ')}){${EOL}`;
         func += `    let sql = 'select * from \`${this.definition.name}\` where ${where.join(' and ')} order by \`${this.definition.primary.fieldName}\` desc limit \'+((page-1)*pageSize)+\',\'+pageSize+\'';${EOL}`;
         func += `    //@row${EOL}`;
@@ -208,12 +203,12 @@ class ModelRender extends BaseRender {
       });
     });${EOL}`;
         func += `  }${EOL}`;
-        output.push(func)
+        output.push(func);
       }
     }
     //fetchByAttr
     let fetchByAttr = `static fetchByAttr(data={}, page=1, pageSize=10){${EOL}`;
-    fetchByAttr += `    let allowKey = ['${Array.from(allowKey).join(`','`)}'];${EOL}`;
+    fetchByAttr += `    let allowKey = ['${Array.from(allowKey).join('\',\'')}'];${EOL}`;
     fetchByAttr += `    let sql = 'select * from \`${this.definition.name}\` where 1 ';${EOL}`;
     fetchByAttr += `    if(Object.keys(data).length===0){
       throw new Error('data param required');
@@ -329,16 +324,16 @@ class ModelRender extends BaseRender {
     for (let k in fieldSet) {
       if (fieldSet[k].rules.length > 0 && !fieldSet[k].autoIncrease) {
         switch (fieldSet[k].rules[0]) {
-          case 'number':
-            output += `    if(this.${k} !== null && !(typeof this.${k}==='number' && this.${k}>=${fieldSet[k].rules[1]} && this.${k}<=${fieldSet[k].rules[2]})){${EOL}`;
-            output += `      throw new Error('attribute ${k}(${fieldSet[k].fieldName}) must be a number in [${fieldSet[k].rules[1]},${fieldSet[k].rules[2]}]');${EOL}`;
-            output += `    }${EOL}`;
-            break;
-          case 'string':
-            output += `    if(this.${k} !== null && !(typeof this.${k}==='string' && this.${k}.length>=${fieldSet[k].rules[1]} && this.${k}.length<=${fieldSet[k].rules[2]})){${EOL}`;
-            output += `      throw new Error('attribute ${k}(${fieldSet[k].fieldName}) must be a string length in [${fieldSet[k].rules[1]},${fieldSet[k].rules[2]}]');${EOL}`;
-            output += `    }${EOL}`;
-            break;
+        case 'number':
+          output += `    if(this.${k} !== null && !(typeof this.${k}==='number' && this.${k}>=${fieldSet[k].rules[1]} && this.${k}<=${fieldSet[k].rules[2]})){${EOL}`;
+          output += `      throw new Error('attribute ${k}(${fieldSet[k].fieldName}) must be a number in [${fieldSet[k].rules[1]},${fieldSet[k].rules[2]}]');${EOL}`;
+          output += `    }${EOL}`;
+          break;
+        case 'string':
+          output += `    if(this.${k} !== null && !(typeof this.${k}==='string' && this.${k}.length>=${fieldSet[k].rules[1]} && this.${k}.length<=${fieldSet[k].rules[2]})){${EOL}`;
+          output += `      throw new Error('attribute ${k}(${fieldSet[k].fieldName}) must be a string length in [${fieldSet[k].rules[1]},${fieldSet[k].rules[2]}]');${EOL}`;
+          output += `    }${EOL}`;
+          break;
         }
       }
     }

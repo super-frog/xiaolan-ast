@@ -48,7 +48,7 @@ class ObjectRender extends BaseRender {
   }
 
   listEnum(enumSet) {
-    let content = `module.exports = ${JSON.stringify(enumSet, null, 2).replace(/"/g,`'`)};`
+    let content = `module.exports = ${JSON.stringify(enumSet, null, 2).replace(/"/g,'\'')};`;
     fs.writeFileSync(`${path.resolve(this.ouputPath)}/Enum.js`, content);
     console.log('File generated in : ' + `${path.resolve(this.ouputPath)}/Enum.js`);
   }
@@ -107,7 +107,7 @@ class ObjectRender extends BaseRender {
         r.toFile();
         continue;
       }
-      output.push(`this.${props[k].name} = options.${props[k].name}${props[k].definition.requirement === true ? `` : ` || ${this.getDefaultValue(props[k].definition)}`};`);
+      output.push(`this.${props[k].name} = options.${props[k].name}${props[k].definition.requirement === true ? '' : ` || ${this.getDefaultValue(props[k].definition)}`};`);
     }
     return output;
   }
@@ -115,23 +115,19 @@ class ObjectRender extends BaseRender {
   getDefaultValue(fieldDefinition = {}) {
     let type = fieldDefinition.type ? fieldDefinition.type.name : 'string';
     switch (type) {
-      case 'string':
-        return `'${fieldDefinition.defaultValue || ''}'`;
-        break;
-      case 'enum':
-      case 'number':
-        return `${fieldDefinition.defaultValue || 0}`;
-        break;
-      case 'array':
-        if (fieldDefinition.defaultValue.length) {
-          return `['${fieldDefinition.defaultValue.join('\',\'')}']`;
-        } else {
-          return '[]';
-        }
-        break;
-      case 'ref':
-        return `new ${fieldDefinition.type.ref.name}({})`;
-        break;
+    case 'string':
+      return `'${fieldDefinition.defaultValue || ''}'`;
+    case 'enum':
+    case 'number':
+      return `${fieldDefinition.defaultValue || 0}`;
+    case 'array':
+      if (fieldDefinition.defaultValue.length) {
+        return `['${fieldDefinition.defaultValue.join('\',\'')}']`;
+      } else {
+        return '[]';
+      }
+    case 'ref':
+      return `new ${fieldDefinition.type.ref.name}({})`;
     }
   }
 
@@ -144,73 +140,73 @@ class ObjectRender extends BaseRender {
   validateFunc() {
     let props = this.definition.props;
     let output = `validate(){${EOL}`;
-
+    let refName ;
     for (let k in props) {
       if (props[k].ref !== undefined) {
-
+        // nothing 
       } else {
         switch (props[k].definition.type.name) {
-          case 'string':
-            output += `    if(!((typeof this.${props[k].name} === 'string') && (this.${props[k].name}.length>=${props[k].definition.type.length[0]}) && (this.${props[k].name}.length<=${props[k].definition.type.length[1]}))){${EOL}`;
-            output += `      throw new Error('type validate failed: [${props[k].name}]: String length must between ${props[k].definition.type.length[0]} to ${props[k].definition.type.length[1]}');${EOL}`;
+        case 'string':
+          output += `    if(!((typeof this.${props[k].name} === 'string') && (this.${props[k].name}.length>=${props[k].definition.type.length[0]}) && (this.${props[k].name}.length<=${props[k].definition.type.length[1]}))){${EOL}`;
+          output += `      throw new Error('type validate failed: [${props[k].name}]: String length must between ${props[k].definition.type.length[0]} to ${props[k].definition.type.length[1]}');${EOL}`;
+          output += `    }${EOL}${EOL}`;
+          break;
+        case 'number':
+          output += `    if(!(!Number.isNaN(this.${props[k].name}) && (this.${props[k].name}>=${props[k].definition.type.range[0]}) && (this.${props[k].name}<=${props[k].definition.type.range[1]}))){${EOL}`;
+          output += `      throw new Error('type validate failed: [${props[k].name}]: Number must in range ${props[k].definition.type.range[0]} to ${props[k].definition.type.range[1]}');${EOL}`;
+          output += `    }${EOL}${EOL}`;
+          break;
+        case 'enum':
+          output += `    if((${JSON.stringify(props[k].definition.type.options).replace(/"/g,'\'')})[this.${props[k].name}] === undefined){${EOL}`;
+          output += `      throw new Error('type validate failed: [${props[k].name}]: ${props[k].name} can only choosing from ["${this.arrayDisplay(props[k].definition.type.options)}"]');${EOL}`;
+          output += `    }${EOL}${EOL}`;
+          break;
+        case 'array':
+          //{ name: 'number', range: [ 0, 100 ], memberRange: [ 1, 99999 ] }
+          //{ name: 'string', length: [ 0, 100 ], memberLength: [ 1, 999 ] }
+          //console.log(props[k].definition.type.member);process.exit(0);
+          switch (props[k].definition.type.member.name) {
+          case 'number':
+            output += `    if(!(Array.isArray(this.${props[k].name}) && (this.${props[k].name}.length >= ${props[k].definition.type.member.range[0]} && this.${props[k].name}.length <= ${props[k].definition.type.member.range[1]}))){${EOL}`;
+            output += `      throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}]');${EOL}`;
+            output += `    }${EOL}`;
+            output += `    for (let k in this.${props[k].name}) {${EOL}`;
+            output += `      if (!((typeof this.${props[k].name}[k] === 'number') && (this.${props[k].name}[k] >= ${props[k].definition.type.member.memberRange[0]}) && (this.${props[k].name}[k] <= ${props[k].definition.type.member.memberRange[1]}))){${EOL}`;
+            output += `        throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}] in ${JSON.stringify(props[k].definition.type.member.memberRange)}');${EOL}`;
+            output += `      }${EOL}`;
             output += `    }${EOL}${EOL}`;
             break;
-          case 'number':
-            output += `    if(!(!Number.isNaN(this.${props[k].name}) && (this.${props[k].name}>=${props[k].definition.type.range[0]}) && (this.${props[k].name}<=${props[k].definition.type.range[1]}))){${EOL}`;
-            output += `      throw new Error('type validate failed: [${props[k].name}]: Number must in range ${props[k].definition.type.range[0]} to ${props[k].definition.type.range[1]}');${EOL}`;
+          case 'string':
+            output += `    if(!(Array.isArray(this.${props[k].name}) && (this.${props[k].name}.length >= ${props[k].definition.type.member.length[0]} && this.${props[k].name}.length <= ${props[k].definition.type.member.length[1]}))){${EOL}`;
+            output += `      throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}]');${EOL}`;
+            output += `    }${EOL}`;
+            output += `    for (let k in this.${props[k].name}) {${EOL}`;
+            output += `      if (!((typeof this.${props[k].name}[k] === 'string') && (this.${props[k].name}[k].length >= ${props[k].definition.type.member.memberLength[0]}) && (this.${props[k].name}[k].length <= ${props[k].definition.type.member.memberLength[1]}))){${EOL}`;
+            output += `        throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}] length in ${JSON.stringify(props[k].definition.type.member.memberRange)}');${EOL}`;
+            output += `      }${EOL}`;
             output += `    }${EOL}${EOL}`;
             break;
           case 'enum':
-            output += `    if((${JSON.stringify(props[k].definition.type.options).replace(/"/g,'\'')})[this.${props[k].name}] === undefined){${EOL}`;
-            output += `      throw new Error('type validate failed: [${props[k].name}]: ${props[k].name} can only choosing from ["${this.arrayDisplay(props[k].definition.type.options)}"]');${EOL}`;
+            output += `    if(!(Array.isArray(this.${props[k].name}) && (this.${props[k].name}.length >= ${props[k].definition.type.member.length[0]} && this.${props[k].name}.length <= ${props[k].definition.type.member.length[1]}))){${EOL}`;
+            output += `      throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}]');${EOL}`;
+            output += `    }${EOL}`;
+            output += `    for (let k in this.${props[k].name}) {${EOL}`;
+            output += `      if (!((typeof this.${props[k].name}[k] === 'string') && (${JSON.stringify(Object.keys(props[k].definition.type.member.options))}.includes(this.${props[k].name}[k])))){${EOL}`;
+            output += `        throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}] in ${JSON.stringify(Object.keys(props[k].definition.type.member.options))}');${EOL}`;
+            output += `      }${EOL}`;
             output += `    }${EOL}${EOL}`;
-            break;
-          case 'array':
-            //{ name: 'number', range: [ 0, 100 ], memberRange: [ 1, 99999 ] }
-            //{ name: 'string', length: [ 0, 100 ], memberLength: [ 1, 999 ] }
-            //console.log(props[k].definition.type.member);process.exit(0);
-            switch (props[k].definition.type.member.name) {
-              case 'number':
-                output += `    if(!(Array.isArray(this.${props[k].name}) && (this.${props[k].name}.length >= ${props[k].definition.type.member.range[0]} && this.${props[k].name}.length <= ${props[k].definition.type.member.range[1]}))){${EOL}`;
-                output += `      throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}]');${EOL}`;
-                output += `    }${EOL}`;
-                output += `    for (let k in this.${props[k].name}) {${EOL}`;
-                output += `      if (!((typeof this.${props[k].name}[k] === 'number') && (this.${props[k].name}[k] >= ${props[k].definition.type.member.memberRange[0]}) && (this.${props[k].name}[k] <= ${props[k].definition.type.member.memberRange[1]}))){${EOL}`;
-                output += `        throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}] in ${JSON.stringify(props[k].definition.type.member.memberRange)}');${EOL}`;
-                output += `      }${EOL}`;
-                output += `    }${EOL}${EOL}`;
-                break;
-              case 'string':
-                output += `    if(!(Array.isArray(this.${props[k].name}) && (this.${props[k].name}.length >= ${props[k].definition.type.member.length[0]} && this.${props[k].name}.length <= ${props[k].definition.type.member.length[1]}))){${EOL}`;
-                output += `      throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}]');${EOL}`;
-                output += `    }${EOL}`;
-                output += `    for (let k in this.${props[k].name}) {${EOL}`;
-                output += `      if (!((typeof this.${props[k].name}[k] === 'string') && (this.${props[k].name}[k].length >= ${props[k].definition.type.member.memberLength[0]}) && (this.${props[k].name}[k].length <= ${props[k].definition.type.member.memberLength[1]}))){${EOL}`;
-                output += `        throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}] length in ${JSON.stringify(props[k].definition.type.member.memberRange)}');${EOL}`;
-                output += `      }${EOL}`;
-                output += `    }${EOL}${EOL}`;
-                break;
-              case 'enum':
-                output += `    if(!(Array.isArray(this.${props[k].name}) && (this.${props[k].name}.length >= ${props[k].definition.type.member.length[0]} && this.${props[k].name}.length <= ${props[k].definition.type.member.length[1]}))){${EOL}`;
-                output += `      throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}]');${EOL}`;
-                output += `    }${EOL}`;
-                output += `    for (let k in this.${props[k].name}) {${EOL}`;
-                output += `      if (!((typeof this.${props[k].name}[k] === 'string') && (${JSON.stringify(Object.keys(props[k].definition.type.member.options))}.includes(this.${props[k].name}[k])))){${EOL}`;
-                output += `        throw new Error('type validate failed: [${props[k].name}]: must be array of [${props[k].definition.type.member.name}] in ${JSON.stringify(Object.keys(props[k].definition.type.member.options))}');${EOL}`;
-                output += `      }${EOL}`;
-                output += `    }${EOL}${EOL}`;
 
-                break;
-            }
             break;
-          case 'ref':
-            let refName = props[k].definition.type.ref.name;
-            output += `    if(!(this.${props[k].name} instanceof ${refName} )){${EOL}`;
-            output += `      throw new Error('type validate failed: [${props[k].name}]: must be instance of  [${refName}]');${EOL}`;
-            output += `    }${EOL}${EOL}`;
-            break;
-          default:
-            break;
+          }
+          break;
+        case 'ref':
+          refName = props[k].definition.type.ref.name;
+          output += `    if(!(this.${props[k].name} instanceof ${refName} )){${EOL}`;
+          output += `      throw new Error('type validate failed: [${props[k].name}]: must be instance of  [${refName}]');${EOL}`;
+          output += `    }${EOL}${EOL}`;
+          break;
+        default:
+          break;
         }
       }
     }
@@ -247,20 +243,17 @@ class ObjectRender extends BaseRender {
 
   formatter(type) {
     switch (type) {
-      case 'string':
-        return `'' + `;
-        break;
-      case 'number':
-        return `1 * `;
-        break;
-      default:
-        return '';
-        break;
+    case 'string':
+      return '\'\' + ';
+    case 'number':
+      return '1 * ';
+    default:
+      return '';
     }
   }
 
   arrayDisplay(arr) {
-    let output = ``;
+    let output = '';
     for (let k in arr) {
       output += ` ${k} -> ${arr[k]}  ,`;
     }
@@ -269,12 +262,11 @@ class ObjectRender extends BaseRender {
 
   typeMap(name) {
     switch (name) {
-      case 'number':
-      case 'float':
-        return 'number';
-        break;
-      default:
-        return name;
+    case 'number':
+    case 'float':
+      return 'number';
+    default:
+      return name;
     }
   }
 }

@@ -1,8 +1,4 @@
-/**
- * Created by lanhao on 2017/9/13.
- */
 
-'use strict';
 const path = require('path');
 
 const ErrorDefinition = require('./handler/ErrorDefinition');

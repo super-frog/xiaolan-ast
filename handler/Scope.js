@@ -1,9 +1,3 @@
-/**
- * Created by lanhao on 2017/9/13.
- * 通用的ast分析
- */
-
-'use strict';
 
 const esprima = require('esprima');
 const fs = require('fs');
@@ -64,42 +58,42 @@ class Scope {
 
     for (let k in ast) {
       switch (ast[k].type) {
-        case 'VariableDeclaration':
-          this.variableDeclaration(ast[k]);
-          break;
-        case 'FunctionDeclaration':
-          this.functionDeclaration(ast[k]);
-          break;
-        case 'ExpressionStatement':
-          this.expressionStatement(ast[k]);
-          break;
-        case 'ReturnStatement':
-          this.ret = this.ret.concat(this.returnStatement(ast[k]));
-          break;
-        case 'ClassDeclaration':
-          this.def['@' + ast[k].id.name] = this.getClassStruct(ast[k]);
-          break;
-        case 'MethodDefinition':
-          if (ast[k].key.name === 'constructor') {
-            if (this.parent) {
-              let tmpDef = {};
-              for (let k in this.parent.def) {
-                this.def[k] = this.def[k] || Object.assign({}, this.parent.def[k]);
-              }
+      case 'VariableDeclaration':
+        this.variableDeclaration(ast[k]);
+        break;
+      case 'FunctionDeclaration':
+        this.functionDeclaration(ast[k]);
+        break;
+      case 'ExpressionStatement':
+        this.expressionStatement(ast[k]);
+        break;
+      case 'ReturnStatement':
+        this.ret = this.ret.concat(this.returnStatement(ast[k]));
+        break;
+      case 'ClassDeclaration':
+        this.def['@' + ast[k].id.name] = this.getClassStruct(ast[k]);
+        break;
+      case 'MethodDefinition':
+        if (ast[k].key.name === 'constructor') {
+          if (this.parent) {
+            let tmpDef = {};
+            for (let k in this.parent.def) {
+              this.def[k] = this.def[k] || Object.assign({}, this.parent.def[k]);
             }
           }
-          this.def['@' + ast[k].key.name] = this.getMethodDef(ast[k]);
-          break;
-        case 'IfStatement':
-          this.ifStatement(ast[k]);
-          break;
-        case 'WhileStatement':
-          this.whileStatement(ast[k]);
-          break;
-        case 'ForStatement':
+        }
+        this.def['@' + ast[k].key.name] = this.getMethodDef(ast[k]);
+        break;
+      case 'IfStatement':
+        this.ifStatement(ast[k]);
+        break;
+      case 'WhileStatement':
+        this.whileStatement(ast[k]);
+        break;
+      case 'ForStatement':
 
-          this.forStatement(ast[k]);
-          break;
+        this.forStatement(ast[k]);
+        break;
       }
 
     }
@@ -167,55 +161,54 @@ class Scope {
       let declare = {};
       if (declarations[k].init) {
         switch (declarations[k].init.type) {
-          case 'AwaitExpression':
-            declare = this.getReturnStruct(declarations[k].init.argument, declarations[k].id.name);
-            //todo
-            if (typeof declare !== 'string') {
-              this.def['@' + declarations[k].id.name] = declare;
-            }
-            break;
-            break;
-          case 'Literal':
-            this.def['@' + declarations[k].id.name] = {
-              type: typeof declarations[k].init.value,
-              value: declarations[k].init.value,
-            };
-            declare = declarations[k].id.name;
-            break;
-          case 'ObjectExpression':
-            this.def['@' + declarations[k].id.name] = {
-              type: 'object',
-              value: this.getObjectStruct(declarations[k].init.properties)
-            };
-            declare = declarations[k].id.name;
-            break;
-          case 'CallExpression':
-            declare = this.getReturnStruct(declarations[k].init, declarations[k].id.name);
+        case 'AwaitExpression':
+          declare = this.getReturnStruct(declarations[k].init.argument, declarations[k].id.name);
+          //todo
+          if (typeof declare !== 'string') {
+            this.def['@' + declarations[k].id.name] = declare;
+          }
+          break;
+        case 'Literal':
+          this.def['@' + declarations[k].id.name] = {
+            type: typeof declarations[k].init.value,
+            value: declarations[k].init.value,
+          };
+          declare = declarations[k].id.name;
+          break;
+        case 'ObjectExpression':
+          this.def['@' + declarations[k].id.name] = {
+            type: 'object',
+            value: this.getObjectStruct(declarations[k].init.properties)
+          };
+          declare = declarations[k].id.name;
+          break;
+        case 'CallExpression':
+          declare = this.getReturnStruct(declarations[k].init, declarations[k].id.name);
 
-            if (typeof declare !== 'string') {
-              this.def['@' + declarations[k].id.name] = declare;
-            }
-            break;
-          case 'Identifier':
-            declare = this.getIdentifierDef(declarations[k].init.name);
-            break;
-          case 'ArrowFunctionExpression':
-            declarations[k].init.id = {
-              type: 'Identifier',
-              name: declarations[k].id.name,
-            };
+          if (typeof declare !== 'string') {
+            this.def['@' + declarations[k].id.name] = declare;
+          }
+          break;
+        case 'Identifier':
+          declare = this.getIdentifierDef(declarations[k].init.name);
+          break;
+        case 'ArrowFunctionExpression':
+          declarations[k].init.id = {
+            type: 'Identifier',
+            name: declarations[k].id.name,
+          };
 
-            declare = this.functionDeclaration(declarations[k].init);
-            break;
-          case 'ArrayExpression':
-            declare = {
-              type: 'array',
-              elements: declarations[k].init.elements[0] ? typeof declarations[k].init.elements[0].value : 'NOT_SURE',
-            };
-            break;
-          case 'BinaryExpression':
+          declare = this.functionDeclaration(declarations[k].init);
+          break;
+        case 'ArrayExpression':
+          declare = {
+            type: 'array',
+            elements: declarations[k].init.elements[0] ? typeof declarations[k].init.elements[0].value : 'NOT_SURE',
+          };
+          break;
+        case 'BinaryExpression':
 
-            break;
+          break;
         }
       }
       declare && (this.var[declarations[k].id.name] = declare);
@@ -252,78 +245,70 @@ class Scope {
     }
 
     switch (stat.argument.type) {
-      case 'ArrayExpression':
-        return {
-          type: 'array',
-          value: stat.argument.elements[0] ? this.returnStatement({ argument: stat.argument.elements[0] }) : 'NOT_SURE',
-        };
-        break;
-      case 'NewExpression':
-        return this.getIdentifierDef(stat.argument.callee.name);
-        break;
-      case 'Identifier':
+    case 'ArrayExpression':
+      return {
+        type: 'array',
+        value: stat.argument.elements[0] ? this.returnStatement({ argument: stat.argument.elements[0] }) : 'NOT_SURE',
+      };
+    case 'NewExpression':
+      return this.getIdentifierDef(stat.argument.callee.name);
+    case 'Identifier':
+      return this.getDefStruct(this.getIdentifierDef(stat.argument.name));
+    case 'Literal':
+      return this.getValueStruct(stat.argument);
+    case 'MemberExpression':
+      let id;
+      let [object, property] = [stat.argument.object.type === 'ThisExpression' ? 'this' : stat.argument.object.name, stat.argument.property.name];
 
-        return this.getDefStruct(this.getIdentifierDef(stat.argument.name));
-
-      case 'Literal':
-        return this.getValueStruct(stat.argument);
-        break;
-      case 'MemberExpression':
-        let id;
-        let [object, property] = [stat.argument.object.type === 'ThisExpression' ? 'this' : stat.argument.object.name, stat.argument.property.name];
-
-        if (object === 'this') {
-          id = property;
-        } else {
-          id = `${stat.argument.object.name}.${stat.argument.property.name}`;
-        }
+      if (object === 'this') {
+        id = property;
+      } else {
+        id = `${stat.argument.object.name}.${stat.argument.property.name}`;
+      }
 
 
-        if (this.parent.def['@' + object] && this.parent.def['@' + object].type === 'module') {
-          //this.def['@' + id] = this.parent.def['@' + object].scope.def['@' + property].scope.ret || {};
-        } else {
-          this.def['@' + id] = {
-            type: 'NOT_SURE',
-            value: id
-          };
-        }
-        return this.def['@' + id];
-        break;
-      case 'CallExpression':
-        return this.getCalleeStruct(stat.argument.callee, stat.argument.arguments);
-        break;
-      case 'AssignmentExpression':
-        let right = stat.argument.right;
-        return this.returnStatement(right);
-        break;
-      case 'ObjectExpression':
-        let obj = {
-          type: 'object',
-          value: {}
-        };
-        for (let k in stat.argument.properties) {
-          obj.value[stat.argument.properties[k].key.name] = {
-            name: stat.argument.properties[k].key.name,
-            type: stat.argument.properties[k].value.value ?
-              stat.argument.properties[k].value.type
-              : undefined,
-            value: {
-              value: stat.argument.properties[k].value.value,
-              type: typeof stat.argument.properties[k].value.value,
-            }
-          };
-          if (stat.argument.properties[k].value.type === 'Identifier') {
-            obj.value[stat.argument.properties[k].key.name] = this.getDefStruct(this.getIdentifierDef(stat.argument.properties[k].value.name));
-          }
-        }
-        return obj;
-        break;
-      default:
-        return {
+      if (this.parent.def['@' + object] && this.parent.def['@' + object].type === 'module') {
+        //this.def['@' + id] = this.parent.def['@' + object].scope.def['@' + property].scope.ret || {};
+      } else {
+        this.def['@' + id] = {
           type: 'NOT_SURE',
-          value: null,
+          value: id
         };
-        break;
+      }
+      return this.def['@' + id];
+    case 'CallExpression':
+      return this.getCalleeStruct(stat.argument.callee, stat.argument.arguments);
+      
+    case 'AssignmentExpression':
+      let right = stat.argument.right;
+      return this.returnStatement(right);
+      
+    case 'ObjectExpression':
+      let obj = {
+        type: 'object',
+        value: {}
+      };
+      for (let k in stat.argument.properties) {
+        obj.value[stat.argument.properties[k].key.name] = {
+          name: stat.argument.properties[k].key.name,
+          type: stat.argument.properties[k].value.value ?
+            stat.argument.properties[k].value.type
+            : undefined,
+          value: {
+            value: stat.argument.properties[k].value.value,
+            type: typeof stat.argument.properties[k].value.value,
+          }
+        };
+        if (stat.argument.properties[k].value.type === 'Identifier') {
+          obj.value[stat.argument.properties[k].key.name] = this.getDefStruct(this.getIdentifierDef(stat.argument.properties[k].value.name));
+        }
+      }
+      return obj;
+    default:
+      return {
+        type: 'NOT_SURE',
+        value: null,
+      };
     }
   }
 
@@ -365,154 +350,149 @@ class Scope {
   expressionStatement(expression) {
 
     switch (expression.expression.type) {
-      case 'CallExpression':
-        return this.getReturnStruct(expression.expression);
-        break;
-      case 'AssignmentExpression':
-        if (this.isExportExpression(expression.expression)) {
-          expression.expression.right.exports = true;
-          this.ret = this.ret.concat(this.getRightStruct(expression.expression.right));
-        } else if (this.isThisExpression(expression.expression)) {
-          this.def['@' + expression.expression.left.property.name] = this.getRightStruct(expression.expression.right);
-          this.var[expression.expression.left.property.name] = expression.expression.left.property.name;
-          if (this.parent) {
-            this.parent.def['@' + expression.expression.left.property.name] = this.def['@' + expression.expression.left.property.name];
-            this.parent.var[expression.expression.left.property.name] = expression.expression.left.property.name;
-          }
-        } else {
+    case 'CallExpression':
+      return this.getReturnStruct(expression.expression);
+      
+    case 'AssignmentExpression':
+      if (this.isExportExpression(expression.expression)) {
+        expression.expression.right.exports = true;
+        this.ret = this.ret.concat(this.getRightStruct(expression.expression.right));
+      } else if (this.isThisExpression(expression.expression)) {
+        this.def['@' + expression.expression.left.property.name] = this.getRightStruct(expression.expression.right);
+        this.var[expression.expression.left.property.name] = expression.expression.left.property.name;
+        if (this.parent) {
+          this.parent.def['@' + expression.expression.left.property.name] = this.def['@' + expression.expression.left.property.name];
+          this.parent.var[expression.expression.left.property.name] = expression.expression.left.property.name;
+        }
+      } else {
 
-          let _tmp = this.def['@' + this.memberExpressionLeftName(expression.expression.left)] = this.getRightStruct(expression.expression.right);
+        let _tmp = this.def['@' + this.memberExpressionLeftName(expression.expression.left)] = this.getRightStruct(expression.expression.right);
 
-          if (expression.expression.left.type === 'MemberExpression' && this.def['@' + expression.expression.left.object.name] && this.def['@' + expression.expression.left.object.name].type === 'object') {
-            let append = {};
-            append[expression.expression.left.property.name] = _tmp;
-            Object.assign(this.def['@' + expression.expression.left.object.name].value, append);
-          } else if (expression.expression.left.type === 'MemberExpression' && this.def['@' + expression.expression.left.object.name] && this.def['@' + expression.expression.left.object.name].type === 'array') {
-            console.log(`${this.file || this.parent.file}: 不允许往数组结构追加属性!`); process.exit(0);
-          }
-
-          this.var[expression.expression.left.name] = expression.expression.left.name;
+        if (expression.expression.left.type === 'MemberExpression' && this.def['@' + expression.expression.left.object.name] && this.def['@' + expression.expression.left.object.name].type === 'object') {
+          let append = {};
+          append[expression.expression.left.property.name] = _tmp;
+          Object.assign(this.def['@' + expression.expression.left.object.name].value, append);
+        } else if (expression.expression.left.type === 'MemberExpression' && this.def['@' + expression.expression.left.object.name] && this.def['@' + expression.expression.left.object.name].type === 'array') {
+          console.log(`${this.file || this.parent.file}: 不允许往数组结构追加属性!`); process.exit(0);
         }
 
-        break;
+        this.var[expression.expression.left.name] = expression.expression.left.name;
+      }
+
+      break;
     }
   }
 
   memberExpressionLeftName(left) {
     switch (left.type) {
-      case 'Identifier':
-        return left.name;
-        break;
-      case 'MemberExpression':
-        return this.memberExpressionLeftName(left.object) + '.' + left.property.name;
-        break;
-      case 'CallExpression':
-        return this.memberExpressionLeftName(left.callee);
-        break;
+    case 'Identifier':
+      return left.name;
+      
+    case 'MemberExpression':
+      return this.memberExpressionLeftName(left.object) + '.' + left.property.name;
+      
+    case 'CallExpression':
+      return this.memberExpressionLeftName(left.callee);
+      
     }
   }
 
   getCalleeStruct(callee, args = {}) {
 
     switch (callee.type) {
-      case 'MemberExpression':
-        let object = this.getDefStruct(this.memberExpressionLeftName(callee.object));
-        if (!object) {
-          if (this.memberExpressionLeftName(callee.object).startsWith('error')) {
-            if (callee.property.name === 'withMessage') {
-              return {
-                type: 'NOT_SURE',
-                value: this.memberExpressionLeftName(callee.object),
-                msg: args[0] ? args[0].value : '',
-              };
-            }
+    case 'MemberExpression':
+      let object = this.getDefStruct(this.memberExpressionLeftName(callee.object));
+      if (!object) {
+        if (this.memberExpressionLeftName(callee.object).startsWith('error')) {
+          if (callee.property.name === 'withMessage') {
+            return {
+              type: 'NOT_SURE',
+              value: this.memberExpressionLeftName(callee.object),
+              msg: args[0] ? args[0].value : '',
+            };
           }
-          //todo 暂时忽视这个问题
-          return {
-            type: 'NOT_SURE'
-          };
         }
-
-        let innerScope = object.scope.scope;
-        let method = innerScope.def['@' + callee.property.name];
-        return method.scope.ret[0];
-        break;
-
-      default:
-        if (this.def['@' + right.callee.name]) {
-          return this.getDefStruct(right.callee.name);
-        }
+        //todo 暂时忽视这个问题
         return {
-          type: 'Identify',
-          value: right.callee.name
+          type: 'NOT_SURE'
         };
-        break;
+      }
+
+      let innerScope = object.scope.scope;
+      let method = innerScope.def['@' + callee.property.name];
+      return method.scope.ret[0];
+
+    default:
+      if (this.def['@' + callee.name]) {
+        return this.getDefStruct(callee.name);
+      }
+      return {
+        type: 'Identify',
+        value: callee.name
+      };
     }
   }
 
   getRightStruct(right) {
     let result = {};
     switch (right.type) {
-      case 'ArrowFunctionExpression':
-        right.id = {
-          type: 'Identifier',
-          name: 'Arrow' + (this.AI++),
-        };
+    case 'ArrowFunctionExpression':
+      right.id = {
+        type: 'Identifier',
+        name: 'Arrow' + (this.AI++),
+      };
 
-        this.functionDeclaration(right);
+      this.functionDeclaration(right);
 
-        return this.getDefStruct(this.getIdentifierDef(right.id.name));
-        break;
+      return this.getDefStruct(this.getIdentifierDef(right.id.name));
 
-      case 'LogicalExpression':
-        return this.getLogicalStruct(right);
-        break;
-      case 'Literal':
-        result = {
-          type: 'Literal',
-          value: {
-            type: typeof right.value,
-            value: right.value,
-          },
+    case 'LogicalExpression':
+      return this.getLogicalStruct(right);
+      
+    case 'Literal':
+      result = {
+        type: 'Literal',
+        value: {
+          type: typeof right.value,
+          value: right.value,
+        },
+      };
+      return result;
+    case 'CallExpression':
+      return this.getCalleeStruct(right.callee, right.arguments);
+      
+    case 'ArrayExpression':
+      return {
+        type: 'array',
+        elements: right.elements[0] ? typeof right.elements[0].value : 'NOT_SURE',
+      };
+      
+    case 'NewExpression':
+      return (this.parent.def ? this.parent.getDefStruct(this.getIdentifierDef(right.callee.name)) : null) || this.getIdentifierDef(right.callee.name);
+      
+    case 'Identifier':
+      this.def['@' + this.getIdentifierDef(right.name)].exports = right.exports;
+      return this.getDefStruct(this.getIdentifierDef(right.name));
+      
+    case 'ObjectExpression':
+      for (let k in right.properties) {
+        let property = right.properties[k];
+        result[property.key.name] = {
+          type: typeof property.value.value,
+          value: property.value.value,
         };
-        return result;
-        break;
-      case 'CallExpression':
-        return this.getCalleeStruct(right.callee, right.arguments);
-        break;
-      case 'ArrayExpression':
-        return {
-          type: 'array',
-          elements: right.elements[0] ? typeof right.elements[0].value : 'NOT_SURE',
-        };
-        break;
-      case 'NewExpression':
-        return (this.parent.def ? this.parent.getDefStruct(this.getIdentifierDef(right.callee.name)) : null) || this.getIdentifierDef(right.callee.name);
-        break;
-      case 'Identifier':
-        this.def['@' + this.getIdentifierDef(right.name)].exports = right.exports;
-        return this.getDefStruct(this.getIdentifierDef(right.name));
-        break;
-      case 'ObjectExpression':
-        for (let k in right.properties) {
-          let property = right.properties[k];
-          result[property.key.name] = {
-            type: typeof property.value.value,
-            value: property.value.value,
-          };
-        }
-        return {
-          type: 'object',
-          value: result
-        };
-        break;
-      case 'MemberExpression':
-        if (right.object.name && right.property.name) {
-          let def = this.def['@' + right.object.name];
-          return def.value[right.property.name];
-        }
-        return result;
-        break;
+      }
+      return {
+        type: 'object',
+        value: result
+      };
+    case 'MemberExpression':
+      if (right.object.name && right.property.name) {
+        let def = this.def['@' + right.object.name];
+        return def.value[right.property.name];
+      }
+      return result;
+      
     }
   }
 
@@ -530,12 +510,11 @@ class Scope {
   //根据类型得到字段定义
   getValueStruct(v) {
     switch (v.type) {
-      case 'Literal':
-        return {
-          type: typeof v.value,
-          value: v.value,
-        };
-        break;
+    case 'Literal':
+      return {
+        type: typeof v.value,
+        value: v.value,
+      };
     }
   }
 
@@ -588,20 +567,19 @@ class Scope {
 
   getMemberExpressionType(expression) {
     switch (expression.type) {
-      case 'MemberExpression':
-        if (expression.object && this.def['@' + expression.object.name] && this.def['@' + expression.object.name].type === 'object') {
-          if (this.def['@' + expression.object.name].value && this.def['@' + expression.object.name].value[expression.property.name]) {
-            return this.def['@' + expression.object.name].value[expression.property.name].value.type;
-          } else {
-            return 'NOT_SURE';
-          }
+    case 'MemberExpression':
+      if (expression.object && this.def['@' + expression.object.name] && this.def['@' + expression.object.name].type === 'object') {
+        if (this.def['@' + expression.object.name].value && this.def['@' + expression.object.name].value[expression.property.name]) {
+          return this.def['@' + expression.object.name].value[expression.property.name].value.type;
         } else {
           return 'NOT_SURE';
         }
-        break;
-      default:
-        return expression.value ? typeof expression.value : 'NOT_SURE';
-        break;
+      } else {
+        return 'NOT_SURE';
+      }
+    default:
+      return expression.value ? typeof expression.value : 'NOT_SURE';
+     
     }
 
   }
@@ -609,70 +587,70 @@ class Scope {
   //处理调用语句的返回结构
   getReturnStruct(callExpression, name) {
     switch (callExpression.callee.type) {
-      case 'Identifier':
-        if (callExpression.callee.name === 'require') {
+    case 'Identifier':
+      if (callExpression.callee.name === 'require') {
 
-          let file = this.resolvedFile(callExpression.arguments[0].value);
-          //当resolved结果跟原来一样,表示是一个核心模块,可以忽略
-          if (file === callExpression.arguments[0].value) {
-            return null;
-          }
-          let scope = new Scope(name, file, this);
-
-          if (scope.ret[0].type === 'class') {
-            this.def['@' + scope.ret[0].scope.name] = {
-              type: 'module',
-              scope: scope.ret[0],
-            };
-            this.def['@' + name] = {
-              type: 'module',
-              scope: scope.ret[0],
-            };
-          } else {
-            this.def['@' + name] = {
-              type: 'module',
-              scope: scope.ret[0],
-            };
-          }
-
-          return name;
-
-        } else if (callExpression.callee.name && this.def['@' + callExpression.callee.name]) {
-          let args = {};
-          for (let k in this.def['@' + callExpression.callee.name].args) {
-            if (callExpression.arguments[k].type === 'Identifier' && this.def['@' + callExpression.arguments[k].name]) {
-              args[this.def['@' + callExpression.callee.name].args[k]] = this.def['@' + callExpression.arguments[k].name];
-            } else {
-              args[this.def['@' + callExpression.callee.name].args[k]] = {
-                value: callExpression.arguments[k].value,
-                type: typeof callExpression.arguments[k].value,
-              };
-            }
-          }
-
+        let file = this.resolvedFile(callExpression.arguments[0].value);
+        //当resolved结果跟原来一样,表示是一个核心模块,可以忽略
+        if (file === callExpression.arguments[0].value) {
+          return null;
         }
-        break;
-      case 'MemberExpression':
-        let id;
-        let [object, property] = [callExpression.callee.object.type === 'ThisExpression' ? 'this' : callExpression.callee.object.name, callExpression.callee.property.name];
+        let scope = new Scope(name, file, this);
 
-        if (object === 'this') {
-          id = property;
+        if (scope.ret[0].type === 'class') {
+          this.def['@' + scope.ret[0].scope.name] = {
+            type: 'module',
+            scope: scope.ret[0],
+          };
+          this.def['@' + name] = {
+            type: 'module',
+            scope: scope.ret[0],
+          };
         } else {
-          id = `${callExpression.callee.object.name}.${callExpression.callee.property.name}`;
+          this.def['@' + name] = {
+            type: 'module',
+            scope: scope.ret[0],
+          };
         }
 
-        if (this.parent && this.parent.def['@' + object] && this.parent.def['@' + object].type === 'module') {
-          this.def['@' + id] = this.parent.getDefStruct(this.parent.def['@' + object].scope.scope.def['@' + property].scope.ret[0]) || {};
+        return name;
+
+      } else if (callExpression.callee.name && this.def['@' + callExpression.callee.name]) {
+        let args = {};
+        for (let k in this.def['@' + callExpression.callee.name].args) {
+          if (callExpression.arguments[k].type === 'Identifier' && this.def['@' + callExpression.arguments[k].name]) {
+            args[this.def['@' + callExpression.callee.name].args[k]] = this.def['@' + callExpression.arguments[k].name];
+          } else {
+            args[this.def['@' + callExpression.callee.name].args[k]] = {
+              value: callExpression.arguments[k].value,
+              type: typeof callExpression.arguments[k].value,
+            };
+          }
         }
-        return this.def['@' + id];
-        break;
+
+      }
+      break;
+    case 'MemberExpression':
+      let id;
+      let [object, property] = [callExpression.callee.object.type === 'ThisExpression' ? 'this' : callExpression.callee.object.name, callExpression.callee.property.name];
+
+      if (object === 'this') {
+        id = property;
+      } else {
+        id = `${callExpression.callee.object.name}.${callExpression.callee.property.name}`;
+      }
+
+      if (this.parent && this.parent.def['@' + object] && this.parent.def['@' + object].type === 'module') {
+        this.def['@' + id] = this.parent.getDefStruct(this.parent.def['@' + object].scope.scope.def['@' + property].scope.ret[0]) || {};
+      }
+      return this.def['@' + id];
+      
     }
   }
 
   getMethodDef(def) {
     let result = {};
-    result = Object.assign(result, this.getFuncDef(def.key.name, def.value))
+    result = Object.assign(result, this.getFuncDef(def.key.name, def.value));
     result['type'] = def.kind;
     result['static'] = def.static;
     return result;

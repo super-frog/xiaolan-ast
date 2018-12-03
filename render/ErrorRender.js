@@ -34,7 +34,7 @@ class ErrorRender extends BaseRender {
       tmp += `    httpStatus: ${p.definition.defaultValue},${EOL}`;
       tmp += `    code: (process.env.APPID || 1001)*1e6+${this.errorCode(p.definition.defaultValue)},${EOL}`;
       tmp += `    message: '${p.definition.comment}',${EOL}`;
-      tmp += `  },`;
+      tmp += '  },';
       this.data._error_.push(tmp);
     }
   }

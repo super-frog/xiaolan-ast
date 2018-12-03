@@ -1,8 +1,4 @@
-/**
- * Created by lanhao on 2017/12/5.
- */
 
-'use strict';
 const BaseRender = require('./BaseRender');
 const faker = require('../lib/faker');
 const EOL = require('os').EOL;
@@ -24,8 +20,8 @@ class TestSuitRender extends BaseRender{
     this.apis = jsoc.apis;
 
     this.dependence();
-    this.output.push(`(async ()=>{`);
-    this.output.push(`  let resp = null;`);
+    this.output.push('(async ()=>{');
+    this.output.push('  let resp = null;');
     for(let k in this.apis){
       this.renderApi(this.apis[k]);
     }
@@ -60,7 +56,7 @@ if(fs.existsSync('./suit.json')){
           
           this.output.push(`${EOL}  //测试边界 ${boundary[bId]} - ${field}=${inputs[inputId]}`);
           this.output.push(`  console.log('测试边界 ${boundary[bId]} - ${field}=${inputs[inputId]}');`);
-          this.output.push(`  resp = await request.init()`);
+          this.output.push('  resp = await request.init()');
 
           for (let k in currentApi.request.params) {
             let inItem = currentApi.request.params[k];
@@ -70,17 +66,17 @@ if(fs.existsSync('./suit.json')){
           this.output.push(`    .url('${this.host}${currentApi.request.uri}')`);
 
           this.output.push(`    .method('${currentApi.request.method}')`);
-          this.output.push(`    .headers({'content-type': 'application/json'})`);
+          this.output.push('    .headers({\'content-type\': \'application/json\'})');
           let inList = ['headers', 'query', 'body'];
           for (let k in inList) {
             this.output.push(`    .${inList[k]}(${this.makeObj(currentApi.request[inList[k]])})`);
           }
-          this.output.push(`    .send();`);
+          this.output.push('    .send();');
           this.output.push(`  if(! (200 ${ops[inputId]} resp.statusCode)){`);
-          this.output.push(`    console.log(resp.body);`);
-          this.output.push(`    console.log(' Failed !! ');`);
-          this.output.push(`    process.exit(-1);`);
-          this.output.push(`  }`);
+          this.output.push('    console.log(resp.body);');
+          this.output.push('    console.log(\' Failed !! \');');
+          this.output.push('    process.exit(-1);');
+          this.output.push('  }');
         }
       }
     }
@@ -115,42 +111,36 @@ if(fs.existsSync('./suit.json')){
 
     }else {
       switch (inItem._type) {
-        case 'number':
-          return inItem._test === undefined ? faker.number(inItem._range[0], inItem._range[1]) : inItem._test;
-          break;
-        case 'string':
-          return inItem._test === undefined ? faker.string(inItem._length[0], inItem._length[1]) : inItem._test;
-          break;
-        default:
-          return '';
-          break;
+      case 'number':
+        return inItem._test === undefined ? faker.number(inItem._range[0], inItem._range[1]) : inItem._test;
+      case 'string':
+        return inItem._test === undefined ? faker.string(inItem._length[0], inItem._length[1]) : inItem._test;
+      default:
+        return '';
       }
     }
   }
 
   makeInputs(inItem){
     switch (inItem._type){
-      case 'number':
-        return [
-          inItem._range[0]-1,inItem._range[0],
-          faker.number(inItem._range[0],inItem._range[1]),
-          inItem._range[1],
-          inItem._range[1]+1
-        ];
-        break;
-      case 'string':
-        return [
-          faker.string(inItem._length[0]-1<0?0:inItem._length[0]-1,inItem._length[0]-1<0?0:inItem._length[0]-1),
-          faker.string(inItem._length[0],inItem._length[0]),
-          faker.string(inItem._length[0],inItem._length[1]),
-          faker.string(inItem._length[1],inItem._length[1]),
-          faker.string(inItem._length[1]+1,inItem._length[1]+1),
-        ];
-        break;
-        //todo more type
-      default:
-        return [];
-        break;
+    case 'number':
+      return [
+        inItem._range[0]-1,inItem._range[0],
+        faker.number(inItem._range[0],inItem._range[1]),
+        inItem._range[1],
+        inItem._range[1]+1
+      ];
+    case 'string':
+      return [
+        faker.string(inItem._length[0]-1<0?0:inItem._length[0]-1,inItem._length[0]-1<0?0:inItem._length[0]-1),
+        faker.string(inItem._length[0],inItem._length[0]),
+        faker.string(inItem._length[0],inItem._length[1]),
+        faker.string(inItem._length[1],inItem._length[1]),
+        faker.string(inItem._length[1]+1,inItem._length[1]+1),
+      ];
+      //todo more type
+    default:
+      return [];
     }
   }
 

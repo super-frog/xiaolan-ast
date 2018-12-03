@@ -1,9 +1,3 @@
-/**
- * Created by lanhao on 2017/10/9.
- * 针对一个命令行工具生成 --help
- */
-
-'use strict';
 
 const esprima = require('esprima');
 const fs = require('fs');
@@ -23,7 +17,6 @@ module.exports = (file) => {
     });
   }catch(e){
     throw new Error(file, e.message);
-    return;
   }
   
   let definitions = {};

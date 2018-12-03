@@ -83,7 +83,7 @@ class ClientRender extends BaseRender {
 }
 
 const camel = (str, studlyCaps = false) => {
-  let o = sp(str)
+  let o = sp(str);
   let output = [];
   for (let k in o) {
     let arr = Array.from(o[k]);

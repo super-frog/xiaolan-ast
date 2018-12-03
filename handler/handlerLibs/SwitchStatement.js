@@ -1,8 +1,3 @@
-/**
- * Created by lanhao on 2017/10/9.
- */
-
-'use strict';
 
 const EOL = require('os').EOL;
 

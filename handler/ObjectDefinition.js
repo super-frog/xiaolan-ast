@@ -1,9 +1,4 @@
-/**
- * Created by lanhao on 2017/9/2.
- * frog 项目的请求对象类编译
- */
 
-'use strict';
 const esprima = require('esprima');
 const fs = require('fs');
 const render = require('../render/objectRender');
@@ -20,7 +15,6 @@ module.exports = (file, output) => {
     });
   }catch(e){
     throw new Error(file, e.message);
-    return;
   }
 
   let definitions = [];
