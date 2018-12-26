@@ -1,10 +1,24 @@
 {
   "host": "",
-  "projectRoot": "/Users/lanhao/test/kk2",
-  "definitions": {
+  "errors": {
     "error.COMMON_ERROR": {
       "code": 1001500001,
-      "message": "通用错误(COMMON_ERROR)",
+      "message": "[COMMON_ERROR]通用错误: ",
+      "data": null
+    },
+    "error.INTERNAL_ERROR": {
+      "code": -1,
+      "message": "[INTERNAL_ERROR]Internal Error: ",
+      "data": null
+    },
+    "error.BAD_REQUEST": {
+      "code": -2,
+      "message": "[BAD_REQUEST]入参检测错误: ",
+      "data": null
+    },
+    "error.NOT_FOUND": {
+      "code": -3,
+      "message": "[NOT_FOUND]not found: ",
       "data": null
     }
   },
@@ -15,38 +29,20 @@
       "group": "",
       "request": {
         "method": "get",
-        "uri": "/",
-        "query": {},
-        "params": {},
-        "body": {
+        "path": "",
+        "query": {
           "name": {
             "_type": "string",
-            "_default": "",
+            "_default": "Robot Xiaolan",
             "_desc": "名字 ",
             "_length": [
               0,
-              64
-            ]
-          },
-          "age": {
-            "_type": "number",
-            "_default": 0,
-            "_desc": "年龄 ",
-            "_range": [
-              0,
-              99
-            ]
-          },
-          "mobile": {
-            "_type": "string",
-            "_default": "",
-            "_desc": "电话 ",
-            "_length": [
-              1,
-              11
+              9007199254740991
             ]
           }
-        }
+        },
+        "params": {},
+        "body": {}
       },
       "response": {
         "body": {
@@ -54,22 +50,10 @@
             {
               "code": {
                 "_type": "number",
-                "_assert": 0
+                "_assert": 200
               },
               "data": {
-                "id": {
-                  "_type": "string"
-                },
                 "name": {
-                  "_type": "string"
-                },
-                "age": {
-                  "_type": "string"
-                },
-                "gender": {
-                  "_type": "string"
-                },
-                "mobile": {
                   "_type": "string"
                 }
               },

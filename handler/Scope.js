@@ -278,11 +278,11 @@ class Scope {
       return this.def['@' + id];
     case 'CallExpression':
       return this.getCalleeStruct(stat.argument.callee, stat.argument.arguments);
-      
+
     case 'AssignmentExpression':
       let right = stat.argument.right;
       return this.returnStatement(right);
-      
+
     case 'ObjectExpression':
       let obj = {
         type: 'object',
@@ -352,7 +352,7 @@ class Scope {
     switch (expression.expression.type) {
     case 'CallExpression':
       return this.getReturnStruct(expression.expression);
-      
+
     case 'AssignmentExpression':
       if (this.isExportExpression(expression.expression)) {
         expression.expression.right.exports = true;
@@ -387,13 +387,13 @@ class Scope {
     switch (left.type) {
     case 'Identifier':
       return left.name;
-      
+
     case 'MemberExpression':
       return this.memberExpressionLeftName(left.object) + '.' + left.property.name;
-      
+
     case 'CallExpression':
       return this.memberExpressionLeftName(left.callee);
-      
+
     }
   }
 
@@ -448,7 +448,7 @@ class Scope {
 
     case 'LogicalExpression':
       return this.getLogicalStruct(right);
-      
+
     case 'Literal':
       result = {
         type: 'Literal',
@@ -460,20 +460,21 @@ class Scope {
       return result;
     case 'CallExpression':
       return this.getCalleeStruct(right.callee, right.arguments);
-      
+
     case 'ArrayExpression':
       return {
         type: 'array',
         elements: right.elements[0] ? typeof right.elements[0].value : 'NOT_SURE',
       };
-      
+
     case 'NewExpression':
       return (this.parent.def ? this.parent.getDefStruct(this.getIdentifierDef(right.callee.name)) : null) || this.getIdentifierDef(right.callee.name);
-      
+
     case 'Identifier':
+      this.def['@' + this.getIdentifierDef(right.name)] = this.def['@' + this.getIdentifierDef(right.name)] || {};
       this.def['@' + this.getIdentifierDef(right.name)].exports = right.exports;
       return this.getDefStruct(this.getIdentifierDef(right.name));
-      
+
     case 'ObjectExpression':
       for (let k in right.properties) {
         let property = right.properties[k];
@@ -492,7 +493,7 @@ class Scope {
         return def.value[right.property.name];
       }
       return result;
-      
+
     }
   }
 
@@ -579,7 +580,7 @@ class Scope {
       }
     default:
       return expression.value ? typeof expression.value : 'NOT_SURE';
-     
+
     }
 
   }
@@ -641,10 +642,21 @@ class Scope {
       }
 
       if (this.parent && this.parent.def['@' + object] && this.parent.def['@' + object].type === 'module') {
-        this.def['@' + id] = this.parent.getDefStruct(this.parent.def['@' + object].scope.scope.def['@' + property].scope.ret[0]) || {};
+        try {
+          this.def['@' + id] =
+              this.parent.getDefStruct(
+                this.parent.def['@' + object]
+                  .scope
+                  .scope.def['@' + property]
+                  .scope
+                  .ret[0]
+              ) || {};
+        } catch (_) {
+          this.def['@' + id] = null;
+        }
       }
       return this.def['@' + id];
-      
+
     }
   }
 
@@ -683,7 +695,7 @@ class Scope {
     if (fs.existsSync(realPath)) {
       return realPath;
     } else {
-      return require.resolve(file);
+      return file;
     }
   }
 

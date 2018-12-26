@@ -35,7 +35,6 @@ index.findHandler = (file) => {
 index.genJsoc = (projectRoot) => {
   projectRoot = path.resolve(projectRoot);
   let jsoc = new JsocDriver(projectRoot);
-  //todo
 };
 
 index.genHelper = (file) => {
